@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<!-- 
+ MiOS Plugin for Radio Thermostat Corporation of America, Inc. Wi-Fi Thermostats
+
+ Copyright (C) 2012  Hugh Eaves
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<scpd xmlns="urn:schemas-upnp-org:service-1-0">
+	<specVersion>
+		<major>1</major>
+		<minor>0</minor>
+	</specVersion>
+	<serviceStateTable>
+		<stateVariable>
+			<name>ThermostatName</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>ThermostatUUID</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>FirmwareVersion</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>WLANFirmwareVersion</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>APIVersion</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>i4</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>LogLevel</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>i1</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>InitialPollDelay</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>i4</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>PollInterval</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>i4</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>ForceHold</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>boolean</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>EnergyLEDColor</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>string</dataType>
+			<defaultValue>Auto</defaultValue>
+			<allowedValueList>
+				<allowedValue>Off</allowedValue>
+				<allowedValue>Red</allowedValue>
+				<allowedValue>Yellow</allowedValue>
+				<allowedValue>Green</allowedValue>
+			</allowedValueList>
+		</stateVariable>
+		<stateVariable>
+			<name>EnergyLEDSet</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>boolean</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>RemoteTempDevice</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>i4</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>RemoteTempSet</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>boolean</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>RemoteTemp</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>i4</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>SyncClock</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>boolean</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>ProgramSetpoints</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>boolean</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>Programs</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>PMAMessage</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>string</dataType>
+		</stateVariable>
+		<stateVariable>
+			<name>PMALine</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>i1</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>PMASet</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>boolean</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>PMATempDevice</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>i4</dataType>
+			<defaultValue>0</defaultValue>
+		</stateVariable>
+		<stateVariable>
+			<name>PluginVersion</name>
+			<sendEventsAttribute>yes</sendEventsAttribute>
+			<dataType>string</dataType>
+		</stateVariable>
+	</serviceStateTable>
+	<actionList>
+		<action>
+			<name>SetEnergyLED</name>
+			<argumentList>
+				<argument>
+					<name>NewColor</name>
+					<direction>in</direction>
+					<relatedStateVariable>EnergyLEDColor</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>ResetEnergyLED</name>
+		</action>
+		<action>
+			<name>SetRemoteTemp</name>
+			<argumentList>
+				<argument>
+					<name>NewTemp</name>
+					<direction>in</direction>
+					<relatedStateVariable>RemoteTemp</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>ResetRemoteTemp</name>
+		</action>
+		<action>
+			<name>SetPMA</name>
+			<argumentList>
+				<argument>
+					<name>NewMessage</name>
+					<direction>in</direction>
+					<relatedStateVariable>PMAMessage</relatedStateVariable>
+				</argument>
+				<argument>
+					<name>NewLine</name>
+					<direction>in</direction>
+					<relatedStateVariable>PMALine</relatedStateVariable>
+				</argument>
+			</argumentList>
+		</action>
+		<action>
+			<name>ResetPMA</name>
+		</action>
+	</actionList>
+</scpd>

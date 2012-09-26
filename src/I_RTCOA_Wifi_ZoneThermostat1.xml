@@ -1,0 +1,157 @@
+<?xml version="1.0"?>
+<!-- 
+ MiOS Plugin for Radio Thermostat Corporation of America, Inc. Wi-Fi Thermostats
+
+ Copyright (C) 2012  Hugh Eaves
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<implementation>
+	<settings>
+		<protocol>raw</protocol>
+	</settings>
+	<functions>
+		-- Using "require" to access compressed modules doesn't work if the 
+		-- module is declared without using the "module" function.
+		-- (see http://bugs.micasaverde.com/view.php?id=2276 )
+		--
+		-- We work around this with a shell script that executes pluto-lzo
+		-- to decompress the module. The temp file is used to
+		-- avoid a race condition when multiple instances of this module
+		-- start at the same time. (to prevent one instance from loading a 
+		-- partially decompressed file from another instance)
+
+		local decompressScript = [[
+decompress_lzo_file() {
+	SRC_FILE=/etc/cmh-ludl/$1.lzo
+	DEST_FILE=/etc/cmh-ludl/$1
+	if [ ! -e $DEST_FILE -o $SRC_FILE -nt $DEST_FILE ]
+	then
+		TEMP_FILE=$(mktemp)
+		pluto-lzo d $SRC_FILE $TEMP_FILE
+		mv $TEMP_FILE $DEST_FILE
+	fi
+}
+]]
+
+		os.execute(decompressScript .. "decompress_lzo_file L_RTCOA_Wifi_core.lua")
+		os.execute(decompressScript .. "decompress_lzo_file L_RTCOA_Wifi_dkjson.lua")
+		os.execute(decompressScript .. "decompress_lzo_file L_RTCOA_Wifi_log.lua")
+		os.execute(decompressScript .. "decompress_lzo_file L_RTCOA_Wifi_util.lua")
+
+		core = require("L_RTCOA_Wifi_core")
+		function thermostatInitialize(lul_device)
+			core.thermostatInitialize(lul_device)
+		end
+	</functions>
+	<startup>thermostatInitialize</startup>
+	<actionList>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:TemperatureSetpoint1_Heat</serviceId>
+			<name>SetCurrentSetpoint</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:upnp-org:serviceId:TemperatureSetpoint1_Heat", "SetCurrentSetpoint")
+			</job>
+		</action>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:TemperatureSetpoint1_Cool</serviceId>
+			<name>SetCurrentSetpoint</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool", "SetCurrentSetpoint")
+			</job>
+		</action>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:HVAC_UserOperatingMode1</serviceId>
+			<name>SetModeTarget</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", "SetModeTarget")
+			</job>
+		</action>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:HVAC_UserOperatingMode1</serviceId>
+			<name>SetEnergyModeTarget</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", "SetEnergyModeTarget")
+			</job>
+		</action>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:HVAC_FanOperatingMode1</serviceId>
+			<name>SetMode</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", "SetMode")
+			</job>
+		</action>
+		<action>
+			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_TemperatureHold1</serviceId>
+			<name>SetTarget</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:hugheaves-com:serviceId:HVAC_RTCOA_TemperatureHold1", "SetTarget")
+			</job>
+		</action>
+		<action>
+			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
+			<name>SetEnergyLED</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "SetEnergyLED")
+			</job>			
+		</action>
+		<action>
+			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
+			<name>ResetEnergyLED</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "ResetEnergyLED")
+			</job>			
+		</action>
+		<action>
+			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
+			<name>SetRemoteTemp</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "SetRemoteTemp")
+			</job>			
+		</action>
+		<action>
+			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
+			<name>ResetRemoteTemp</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "ResetRemoteTemp")
+			</job>			
+		</action>
+		<action>
+			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
+			<name>SetPMA</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "SetPMA")
+			</job>			
+		</action>
+		<action>
+			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
+			<name>ResetPMA</name>
+			<job>
+				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "ResetPMA")
+			</job>			
+		</action>
+	</actionList>
+</implementation>

@@ -1,0 +1,998 @@
+ {
+    "flashicon": "http://www.hugheaves.com/vera/resources/thermostat/2.1/thermostat_icon.png",
+    "iconText": "1",
+    "imgIconBody": "",
+    "imgIconDimmable": "",
+    "imgIconTurnable": "",
+    "imgIconMin": "",
+    "imgIconMax": "",
+    "halloIconsDir": "pics/hallo",
+    "x": "5",
+    "y": "4",
+    "inScene": "1",
+    "DisplayStatus": {
+        "Style": "numeric",
+        "Service": "urn:upnp-org:serviceId:TemperatureSensor1",
+        "Variable": "CurrentTemperature",
+        "MinValue": "-20",
+        "MaxValue": "100",
+        "ExtraDisplay": {
+            "HeatSetPoint": {
+                "Style": "numeric",
+                "Service": "urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
+                "Variable": "CurrentSetpoint"
+            },
+            "CoolSetPoint": {
+                "Style": "numeric",
+                "Service": "urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
+                "Variable": "CurrentSetpoint"
+            },
+            "ThermostatMode": {
+                "Style": "numeric",
+                "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                "Variable": "ModeStatus"
+            },
+            "FanMode": {
+                "Style": "numeric",
+                "Service": "urn:upnp-org:serviceId:HVAC_FanOperatingMode1",
+                "Variable": "Mode"
+            }
+        }
+    },
+    "doc_url": {
+        "doc_language": 1,
+        "doc_manual": 1,
+        "doc_version": 1,
+        "doc_platform": 0,
+        "doc_page": "thermostats"
+    },
+    "ToggleButton": 1,
+    "Tabs": [
+        {
+            "Label": {
+                "lang_tag": "tabname_control",
+                "text": "Control"
+            },
+            "Position": "0",
+            "TabType": "flash",
+            "ControlGroup": [
+                {
+                    "id": "1",
+                    "scenegroup": "1"
+                },
+                {
+                    "id": "4",
+                    "scenegroup": "4"
+                },
+                {
+                    "id": "7",
+                    "scenegroup": "7"
+                },
+                {
+                    "id": "6",
+                    "scenegroup": "6"
+                },
+                {
+                    "id": "5",
+                    "scenegroup": "5"
+                },
+                {
+                    "id": "8",
+                    "scenegroup": "8"
+                }
+            ],
+            "SceneGroup": [
+                {
+                    "id": "1",
+                    "top": "0",
+                    "left": "0",
+                    "x": "1",
+                    "y": "4"
+                },
+                {
+                    "id": "4",
+                    "top": "0",
+                    "left": "1",
+                    "x": "1",
+                    "y": "4"
+                },
+                {
+                    "id": "7",
+                    "top": "0",
+                    "left": "4",
+                    "x": "0.5",
+                    "y": "3"
+                },
+                {
+                    "id": "6",
+                    "top": "0",
+                    "left": "4.5",
+                    "x": "0.5",
+                    "y": "3"
+                },
+                {
+                    "id": "5",
+                    "top": "0",
+                    "left": "2",
+                    "x": "1",
+                    "y": "4"
+                },
+                {
+                    "id": "8",
+                    "top": "0",
+                    "left": "3",
+                    "x": "1",
+                    "y": "4"
+                }
+            ],
+            "Control": [
+                {
+                    "ControlType": "label",
+                    "top": "0",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "thermostat",
+                        "text": "Thermostat"
+                    },
+                    "Display": {
+                        "Top": 0,
+                        "Left": 30,
+                        "Width": 100,
+                        "Height": 25
+                    }
+                },
+                {
+                    "ControlGroup": "1",
+                    "ControlType": "button",
+                    "top": "0",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_off",
+                        "text": "Off"
+                    },
+                    "Display": {
+                        "Top": 30,
+                        "Left": 50,
+                        "Width": 75,
+                        "Height": 20,
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Variable": "ModeStatus",
+                        "Value": "Off"
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Action": "SetModeTarget",
+                        "Parameters": [
+                            {
+                                "Name": "NewModeTarget",
+                                "Value": "Off"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "1",
+                    "ControlType": "button",
+                    "top": "1",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_auto",
+                        "text": "Auto"
+                    },
+                    "Display": {
+                        "Top": 30,
+                        "Left": 150,
+                        "Width": 75,
+                        "Height": 20,
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Variable": "ModeStatus",
+                        "Value": "AutoChangeOver"
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Action": "SetModeTarget",
+                        "Parameters": [
+                            {
+                                "Name": "NewModeTarget",
+                                "Value": "AutoChangeOver"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "1",
+                    "ControlType": "button",
+                    "top": "2",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_cool",
+                        "text": "Cool"
+                    },
+                    "Display": {
+                        "Top": 30,
+                        "Left": 250,
+                        "Width": 75,
+                        "Height": 20,
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Variable": "ModeStatus",
+                        "Value": "CoolOn"
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Action": "SetModeTarget",
+                        "Parameters": [
+                            {
+                                "Name": "NewModeTarget",
+                                "Value": "CoolOn"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "1",
+                    "ControlType": "button",
+                    "top": "3",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_heat",
+                        "text": "Heat"
+                    },
+                    "Display": {
+                        "Top": 30,
+                        "Left": 350,
+                        "Width": 75,
+                        "Height": 20,
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Variable": "ModeStatus",
+                        "Value": "HeatOn"
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Action": "SetModeTarget",
+                        "Parameters": [
+                            {
+                                "Name": "NewModeTarget",
+                                "Value": "HeatOn"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "7",
+                    "ControlType": "slider_vertical",
+                    "top": "0",
+                    "left": "3",
+                    "ControlPair": "1",
+                    "ID": "NewCurrentSetpointHeat",
+                    "Style": "numeric",
+                    "Display": {
+                        "Service": "urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
+                        "Variable": "CurrentSetpoint",
+                        "Top": 30,
+                        "Left": 500,
+                        "Width": 100,
+                        "Height": 20
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
+                        "Action": "SetCurrentSetpoint",
+                        "Parameters": [
+                            {
+                                "Name": "NewCurrentSetpoint",
+                                "ID": "NewCurrentSetpointHeat"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "6",
+                    "ControlType": "slider_vertical",
+                    "top": "0",
+                    "left": "3.5",
+                    "ControlPair": "1",
+                    "ID": "NewCurrentSetpointCool",
+                    "Style": "numeric",
+                    "Display": {
+                        "Service": "urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
+                        "Variable": "CurrentSetpoint",
+                        "Top": 30,
+                        "Left": 570,
+                        "Width": 100,
+                        "Height": 20
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
+                        "Action": "SetCurrentSetpoint",
+                        "Parameters": [
+                            {
+                                "Name": "NewCurrentSetpoint",
+                                "ID": "NewCurrentSetpointCool"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "4",
+                    "ControlType": "label",
+                    "top": "0.1",
+                    "left": "0",
+                    "text_align": "left",
+                    "Label": {
+                        "lang_tag": "fan",
+                        "text": "Fan"
+                    },
+                    "Display": {
+                        "Top": 60,
+                        "Left": 30,
+                        "Width": 100,
+                        "Height": 20
+                    }
+                },
+                {
+                    "ControlGroup": "4",
+                    "ControlType": "button",
+                    "top": "1",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_auto",
+                        "text": "Auto"
+                    },
+                    "Display": {
+                        "Top": 90,
+                        "Left": 50,
+                        "Width": 100,
+                        "Height": 20,
+                        "Service": "urn:upnp-org:serviceId:HVAC_FanOperatingMode1",
+                        "Variable": "Mode",
+                        "Value": "Auto"
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:HVAC_FanOperatingMode1",
+                        "Action": "SetMode",
+                        "Parameters": [
+                            {
+                                "Name": "NewMode",
+                                "Value": "Auto"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "4",
+                    "ControlType": "button",
+                    "top": "2",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_on",
+                        "text": "On"
+                    },
+                    "Display": {
+                        "Top": 90,
+                        "Left": 160,
+                        "Width": 100,
+                        "Height": 20,
+                        "Service": "urn:upnp-org:serviceId:HVAC_FanOperatingMode1",
+                        "Variable": "Mode",
+                        "Value": "ContinuousOn"
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:HVAC_FanOperatingMode1",
+                        "Action": "SetMode",
+                        "Parameters": [
+                            {
+                                "Name": "NewMode",
+                                "Value": "ContinuousOn"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "4",
+                    "ControlType": "button",
+                    "top": "3",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_cycle",
+                        "text": "Cycle"
+                    },
+                    "Display": {
+                        "Top": 90,
+                        "Left": 270,
+                        "Width": 100,
+                        "Height": 20,
+                        "Service": "urn:upnp-org:serviceId:HVAC_FanOperatingMode1",
+                        "Variable": "Mode",
+                        "Value": "PeriodicOn"
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:HVAC_FanOperatingMode1",
+                        "Action": "SetMode",
+                        "Parameters": [
+                            {
+                                "Name": "NewMode",
+                                "Value": "PeriodicOn"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "5",
+                    "ControlType": "label",
+                    "top": "0.1",
+                    "left": "0",
+                    "text_align": "left",
+                    "Label": {
+                        "lang_tag": "energy_mode",
+                        "text": "Energy Save"
+                    },
+                    "Display": {
+                        "Top": 120,
+                        "Left": 30,
+                        "Width": 100,
+                        "Height": 20
+                    }
+                },
+                {
+                    "ControlGroup": "5",
+                    "ControlType": "button",
+                    "top": "1",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_energy",
+                        "text": "Energy"
+                    },
+                    "Display": {
+                        "Top": 150,
+                        "Left": 50,
+                        "Width": 100,
+                        "Height": 20,
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Variable": "EnergyModeStatus",
+                        "Value": "EnergySavingsMode"
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Action": "SetEnergyModeTarget",
+                        "Parameters": [
+                            {
+                                "Name": "NewModeTarget",
+                                "Value": "EnergySavingsMode"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "5",
+                    "ControlType": "button",
+                    "top": "2",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_normal",
+                        "text": "Normal"
+                    },
+                    "Display": {
+                        "Top": 150,
+                        "Left": 160,
+                        "Width": 100,
+                        "Height": 20,
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Variable": "EnergyModeStatus",
+                        "Value": "Normal"
+                    },
+                    "Command": {
+                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                        "Action": "SetEnergyModeTarget",
+                        "Parameters": [
+                            {
+                                "Name": "NewModeTarget",
+                                "Value": "Normal"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "8",
+                    "ControlType": "label",
+                    "top": "0.1",
+                    "left": "0",
+                    "text_align": "left",
+                    "Label": {
+                        "lang_tag": "hold_mode",
+                        "text": "Hold"
+                    },
+                    "Display": {
+                        "Top": 180,
+                        "Left": 30,
+                        "Width": 100,
+                        "Height": 20
+                    }
+                },
+                {
+                    "ControlGroup": "8",
+                    "ControlType": "button",
+                    "top": "1",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_hold_off",
+                        "text": "Off"
+                    },
+                    "Display": {
+                        "Top": 210,
+                        "Left": 50,
+                        "Width": 100,
+                        "Height": 20,
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_TemperatureHold1",
+                        "Variable": "Status",
+                        "Value": "0"
+                    },
+                    "Command": {
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_TemperatureHold1",
+                        "Action": "SetTarget",
+                        "Parameters": [
+                            {
+                                "Name": "newTargetValue",
+                                "Value": "0"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "8",
+                    "ControlType": "button",
+                    "top": "2",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_hold_on",
+                        "text": "On"
+                    },
+                    "Display": {
+                        "Top": 210,
+                        "Left": 160,
+                        "Width": 100,
+                        "Height": 20,
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_TemperatureHold1",
+                        "Variable": "Status",
+                        "Value": "1"
+                    },
+                    "Command": {
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_TemperatureHold1",
+                        "Action": "SetTarget",
+                        "Parameters": [
+                            {
+                                "Name": "newTargetValue",
+                                "Value": "1"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "Label": {
+                "lang_tag": "settings",
+                "text": "Settings"
+            },
+            "Position": "1",
+            "TabType": "javascript",
+            "ScriptName": "shared.js",
+            "Function": "simple_device"
+        },
+        {
+            "Label": {
+                "lang_tag": "advanced",
+                "text": "Advanced"
+            },
+            "Position": "2",
+            "TabType": "javascript",
+            "ScriptName": "shared.js",
+            "Function": "advanced_device"
+        },
+        {
+            "Label": {
+                "lang_tag": "logs",
+                "text": "Logs"
+            },
+            "Position": "4",
+            "TabType": "javascript",
+            "ScriptName": "shared.js",
+            "Function": "device_logs"
+        },
+        {
+            "Label": {
+                "lang_tag": "notifications",
+                "text": "Notifications"
+            },
+            "Position": "5",
+            "TabType": "javascript",
+            "ScriptName": "shared.js",
+            "Function": "device_notifications"
+        },
+        {
+            "Label": {
+                "lang_tag": "scheduler",
+                "text": "Scheduler"
+            },
+            "Position": "6",
+            "TabType": "javascript",
+            "ScriptName": "cpanel_data.js",
+            "Function": "weekly_scheduler"
+        }
+    ],
+    "sceneList": {
+        "group_1": {
+            "cmd_1": {
+                "label": "OFF",
+                "serviceId": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                "action": "SetModeTarget",
+                "arguments": {
+                    "NewModeTarget": "Off"
+                }
+            },
+            "cmd_2": {
+                "label": "COOL",
+                "serviceId": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                "action": "SetModeTarget",
+                "arguments": {
+                    "NewModeTarget": "CoolOn"
+                }
+            },
+            "cmd_3": {
+                "label": "HEAT",
+                "serviceId": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                "action": "SetModeTarget",
+                "arguments": {
+                    "NewModeTarget": "HeatOn"
+                }
+            },
+            "cmd_4": {
+                "label": "AUTO",
+                "serviceId": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+                "action": "SetModeTarget",
+                "arguments": {
+                    "NewModeTarget": "AutoChangeOver"
+                }
+            }
+        },
+        "group_2": {
+            "cmd_1": {
+                "label": "Set Heat Setpoint",
+                "serviceId": "urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
+                "action": "SetCurrentSetpoint",
+                "argumentList": {
+                    "argument_1": {
+                        "dataType": "ui1",
+                        "defaultValue": "",
+                        "allowedValueRange": {
+                            "minimum": "0",
+                            "maximum": "100"
+                        },
+                        "prefix": "to",
+                        "suffix": "&deg;",
+                        "name": "NewCurrentSetpoint"
+                    }
+                }
+            }
+        },
+        "group_3": {
+            "cmd_1": {
+                "label": "Set Cool Setpoint",
+                "serviceId": "urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
+                "action": "SetCurrentSetpoint",
+                "argumentList": {
+                    "argument_1": {
+                        "dataType": "ui1",
+                        "defaultValue": "",
+                        "allowedValueRange": {
+                            "minimum": "0",
+                            "maximum": "100"
+                        },
+                        "prefix": "to",
+                        "suffix": "&deg;",
+                        "name": "NewCurrentSetpoint"
+                    }
+                }
+            }
+        },
+        "group_4": {
+            "cmd_1": {
+                "label": "Set Fan On",
+                "serviceId": "urn:upnp-org:serviceId:HVAC_FanOperatingMode1",
+                "action": "SetMode",
+                "arguments": {
+                    "NewMode": "ContinuousOn"
+                }
+            },
+            "cmd_2": {
+                "label": "Set Fan Auto",
+                "serviceId": "urn:upnp-org:serviceId:HVAC_FanOperatingMode1",
+                "action": "SetMode",
+                "arguments": {
+                    "NewMode": "Auto"
+                }
+            }
+        },
+        "group_5": {
+            "cmd_1": {
+                "label": "Normal",
+                "serviceId": "urn:upnp-org:serviceId:SwitchPower1",
+                "action": "SetTarget",
+                "arguments": {
+                    "newTargetValue": "1"
+                }
+            },
+            "cmd_2": {
+                "label": "Energy",
+                "serviceId": "urn:upnp-org:serviceId:SwitchPower1",
+                "action": "SetTarget",
+                "arguments": {
+                    "newTargetValue": "0"
+                }
+            }
+        }
+    },
+    "eventList2": [
+        {
+            "id": 1,
+            "label": {
+                "lang_tag": "thermostat_mode_changes",
+                "text": "Thermostat Mode Changes"
+            },
+            "serviceId": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "string",
+                    "defaultValue": "",
+                    "allowedValueList": [
+                        {
+                            "Off": "Off",
+                            "HumanFriendlyText": {
+                                "lang_tag": "hft_device_turned_off",
+                                "text": "_DEVICE_NAME_ is turned off"
+                            }
+                        },
+                        {
+                            "Cool": "CoolOn",
+                            "HumanFriendlyText": {
+                                "lang_tag": "hft_thermostat_set_to_cool",
+                                "text": "_DEVICE_NAME_ is set to cool"
+                            }
+                        },
+                        {
+                            "Heat": "HeatOn",
+                            "HumanFriendlyText": {
+                                "lang_tag": "hft_thermostat_set_to_heat",
+                                "text": "_DEVICE_NAME_ is set to heat"
+                            }
+                        },
+                        {
+                            "Auto": "AutoChangeOver",
+                            "HumanFriendlyText": {
+                                "lang_tag": "hft_thermostat_set_to_auto",
+                                "text": "_DEVICE_NAME_ is set to auto"
+                            }
+                        }
+                    ],
+                    "name": "ModeStatus",
+                    "comparisson": "=",
+                    "prefix": {
+                        "lang_tag": "mode",
+                        "text": "Mode"
+                    },
+                    "suffix": {}
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "label": {
+                "lang_tag": "ambient_temperature_goes_above",
+                "text": "Ambient temperature goes above"
+            },
+            "serviceId": "urn:upnp-org:serviceId:TemperatureSensor1",
+            "norepeat": "1",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "i4",
+                    "name": "CurrentTemperature",
+                    "comparisson": ">",
+                    "prefix": {
+                        "lang_tag": "temperature",
+                        "text": "Temperature"
+                    },
+                    "suffix": {
+                        "lang_tag": "degrees",
+                        "text": "degrees"
+                    },
+                    "HumanFriendlyText": {
+                        "lang_tag": "hft_ambient_temperature_goes_above",
+                        "text": "_DEVICE_NAME_ ambient temperature goes above _ARGUMENT_VALUE_ degrees"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "label": {
+                "lang_tag": "normal_mode_changes",
+                "text": "Energy Mode or Normal Mode Changes"
+            },
+            "serviceId": "urn:upnp-org:serviceId:SwitchPower1",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "boolean",
+                    "defaultValue": "1",
+                    "allowedValueList": [
+                        {
+                            "Energy": "0",
+                            "HumanFriendlyText": {
+                                "lang_tag": "hft_thermostat_energy_energy",
+                                "text": "_DEVICE_NAME_ set to energy"
+                            }
+                        },
+                        {
+                            "Normal": "1",
+                            "HumanFriendlyText": {
+                                "lang_tag": "hft_thermostat_energy_normal",
+                                "text": "_DEVICE_NAME_ set to normal"
+                            }
+                        }
+                    ],
+                    "name": "Status",
+                    "comparisson": "=",
+                    "prefix": {
+                        "lang_tag": "which_mode",
+                        "text": "Which mode"
+                    },
+                    "suffix": {}
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "label": {
+                "lang_tag": "exact_ambient_temperature_is_reached",
+                "text": "Exact Ambient temperature is reached"
+            },
+            "serviceId": "urn:upnp-org:serviceId:TemperatureSensor1",
+            "norepeat": "1",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "i4",
+                    "name": "CurrentTemperature",
+                    "comparisson": "<,>",
+                    "prefix": {
+                        "lang_tag": "temperature",
+                        "text": "Temperature"
+                    },
+                    "suffix": {
+                        "lang_tag": "degrees",
+                        "text": "degrees"
+                    },
+                    "HumanFriendlyText": {
+                        "lang_tag": "hft_thermostat_reach_exact_temperature",
+                        "text": "_DEVICE_NAME_ reach _ARGUMENT_VALUE_ degrees"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "label": {
+                "lang_tag": "thermostat_heat_point_goes_over",
+                "text": "Thermostat HEAT set point goes over"
+            },
+            "serviceId": "urn:upnp-org:serviceId:TemperatureSetpoint1_Heat",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "i4",
+                    "name": "CurrentSetpoint",
+                    "comparisson": ">",
+                    "prefix": {
+                        "lang_tag": "temperature",
+                        "text": "Temperature"
+                    },
+                    "suffix": {
+                        "lang_tag": "degrees",
+                        "text": "degrees"
+                    },
+                    "HumanFriendlyText": {
+                        "lang_tag": "hft_thermostat_heatpoint_goes_over",
+                        "text": "_DEVICE_NAME_ heat point goes over _ARGUMENT_VALUE_ degrees"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "label": {
+                "lang_tag": "thermostat_coolpoint_goes_below",
+                "text": "Thermostat COOL set point goes below"
+            },
+            "serviceId": "urn:upnp-org:serviceId:TemperatureSetpoint1_Cool",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "i4",
+                    "name": "CurrentSetpoint",
+                    "comparisson": "<",
+                    "prefix": {
+                        "lang_tag": "temperature",
+                        "text": "Temperature"
+                    },
+                    "suffix": {
+                        "lang_tag": "degrees",
+                        "text": "degrees"
+                    },
+                    "HumanFriendlyText": {
+                        "lang_tag": "hft_thermostat_coolpoint_goes_below",
+                        "text": "_DEVICE_NAME_ cool point goes below _ARGUMENT_VALUE_ degrees"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "label": {
+                "lang_tag": "ambient_temperature_goes_below",
+                "text": "Ambient temperature goes below"
+            },
+            "serviceId": "urn:upnp-org:serviceId:TemperatureSensor1",
+            "norepeat": "1",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "dataType": "i4",
+                    "name": "CurrentTemperature",
+                    "comparisson": "<",
+                    "prefix": {
+                        "lang_tag": "temperature",
+                        "text": "Temperature"
+                    },
+                    "suffix": {
+                        "lang_tag": "degrees",
+                        "text": "degrees"
+                    },
+                    "HumanFriendlyText": {
+                        "lang_tag": "hft_ambient_temperature_goes_below",
+                        "text": "_DEVICE_NAME_ ambient temperature goes below _ARGUMENT_VALUE_ degrees"
+                    }
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "label": {
+                "lang_tag": "battery_level_goes_below",
+                "text": "Battery level goes below"
+            },
+            "serviceId": "urn:micasaverde-com:serviceId:HaDevice1",
+            "argumentList": [
+                {
+                    "id": 1,
+                    "prefix": {
+                        "lang_tag": "Level",
+                        "text": "Level"
+                    },
+                    "dataType": "i4",
+                    "name": "BatteryLevel",
+                    "comparisson": "<",
+                    "suffix": {
+                        "lang_tag": "percent_sign",
+                        "text": "%"
+                    },
+                    "HumanFriendlyText": {
+                        "lang_tag": "hft_battery_level_goes_below",
+                        "text": "Battery level for _DEVICE_NAME_ goes below _ARGUMENT_VALUE_%"
+                    }
+                }
+            ]
+        }
+    ],
+    "DeviceType": "urn:schemas-hugheaves-com:device:RTCOA_Wifi_ZoneThermostat:1",
+    "device_type": "urn:schemas-hugheaves-com:device:RTCOA_Wifi_ZoneThermostat:1"
+}
