@@ -1,5 +1,5 @@
  {
-    "flashicon": "http://www.hugheaves.com/vera/resources/thermostat/2.1/thermostat_icon.png",
+    "flashicon": "http://www.hugheaves.com/vera/resources/thermostat/2.2/thermostat_icon.png",
     "iconText": "1",
     "imgIconBody": "",
     "imgIconDimmable": "",
@@ -168,7 +168,8 @@
                                 "Value": "Off"
                             }
                         ]
-                    }
+                    },
+					"ControlCode": "hvac_off"
                 },
                 {
                     "ControlGroup": "1",
@@ -197,7 +198,8 @@
                                 "Value": "AutoChangeOver"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "hvac_auto"
                 },
                 {
                     "ControlGroup": "1",
@@ -226,7 +228,8 @@
                                 "Value": "CoolOn"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "hvac_cool"
                 },
                 {
                     "ControlGroup": "1",
@@ -255,7 +258,8 @@
                                 "Value": "HeatOn"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "hvac_heat"
                 },
                 {
                     "ControlGroup": "7",
@@ -282,7 +286,8 @@
                                 "ID": "NewCurrentSetpointHeat"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "heating_setpoint"
                 },
                 {
                     "ControlGroup": "6",
@@ -309,7 +314,8 @@
                                 "ID": "NewCurrentSetpointCool"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "cooling_setpoint"
                 },
                 {
                     "ControlGroup": "4",
@@ -355,7 +361,8 @@
                                 "Value": "Auto"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "fan_auto"
                 },
                 {
                     "ControlGroup": "4",
@@ -384,7 +391,8 @@
                                 "Value": "ContinuousOn"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "fan_on"
                 },
                 {
                     "ControlGroup": "4",
@@ -413,7 +421,8 @@
                                 "Value": "PeriodicOn"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "fan_circulate"
                 },
                 {
                     "ControlGroup": "5",
@@ -459,7 +468,8 @@
                                 "Value": "EnergySavingsMode"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "energy_energy"
                 },
                 {
                     "ControlGroup": "5",
@@ -563,7 +573,8 @@
                                 "Value": "1"
                             }
                         ]
-                    }
+                    },
+                    "ControlCode": "energy_normal"
                 }
             ]
         },
@@ -606,16 +617,6 @@
             "TabType": "javascript",
             "ScriptName": "shared.js",
             "Function": "device_notifications"
-        },
-        {
-            "Label": {
-                "lang_tag": "scheduler",
-                "text": "Scheduler"
-            },
-            "Position": "6",
-            "TabType": "javascript",
-            "ScriptName": "cpanel_data.js",
-            "Function": "weekly_scheduler"
         }
     ],
     "sceneList": {
@@ -853,8 +854,8 @@
         {
             "id": 4,
             "label": {
-                "lang_tag": "exact_ambient_temperature_is_reached",
-                "text": "Exact Ambient temperature is reached"
+                "lang_tag": "ambient_temperature_goes_above_or_below",
+                "text": "Ambient temperature goes above or below"
             },
             "serviceId": "urn:upnp-org:serviceId:TemperatureSensor1",
             "norepeat": "1",
@@ -873,8 +874,8 @@
                         "text": "degrees"
                     },
                     "HumanFriendlyText": {
-                        "lang_tag": "hft_thermostat_reach_exact_temperature",
-                        "text": "_DEVICE_NAME_ reach _ARGUMENT_VALUE_ degrees"
+                        "lang_tag": "hft_ambient_temperature_goes_above_or_below",
+                        "text": "_DEVICE_NAME_ goes above/below _ARGUMENT_VALUE_ degrees"
                     }
                 }
             ]

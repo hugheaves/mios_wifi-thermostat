@@ -1,0 +1,3 @@
+[submodule "lib/mios_zzcommon"]
+	path = lib/mios_zzcommon
+	url = http://git.hugheaves.com/git/mios_zzcommon.git

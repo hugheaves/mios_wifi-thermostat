@@ -21,17 +21,17 @@ local luup = luup
 local string = string
 local require = require
 local math = math
+local json = g_dkjson
+local log = g_log
+local util = g_util
 
 -- IMPORT REQUIRED MODULES
 local http = require("socket.http")
-local json = require("L_RTCOA_Wifi_dkjson")
-local log = require("L_RTCOA_Wifi_log")
-local util = require("L_RTCOA_Wifi_util")
 
 -- CONSTANTS
 
 -- Plug-in version
-local PLUGIN_VERSION = "2.1"
+local PLUGIN_VERSION = "2.2"
 
 -- assign a few from util module to reduce verbosity
 
@@ -78,8 +78,6 @@ local MCV_ENERGY_METERING_SID = "urn:micasaverde-com:serviceId:EnergyMetering1"
 
 -- I added these to support RTCOA specific features
 local TEMPERATURE_HOLD_SID = "urn:hugheaves-com:serviceId:HVAC_RTCOA_TemperatureHold1"
-local OLDEST_RTCOA_WIFI_SID = "urn:upnp-org:serviceId:HVAC_RTCOA_Wifi1" -- ooops, wrong namespace used in old sourcecode
-local OLDER_RTCOA_WIFI_SID = "urn:schemas-hugheaves-com::serviceId:HVAC_RTCOA_Wifi1" -- wow, I really can't type!
 local RTCOA_WIFI_SID = "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1"
 
 -- SIDs to sync between the main and generic thermostat devices
@@ -185,32 +183,6 @@ local TSTAT_API_FSTATE = {
 [1] = "On"
 }
 
-
--------------------------------------
--------- Utility functions ----------
--------------------------------------
-
--- math rounding function (would be nice if Lua had this!)
-local function round (value, multiplier)
-	local result = 0
-	if (value >= 0) then
-		return math.floor(value * multiplier + 0.5) / multiplier
-	else
-		return math.ceil(value * multiplier - 0.5) / multiplier
-	end
-end
-
--- lookup a key in a table by its value
-local function findKeyByValue(table, value)
-	for k,v in pairs(table) do
-		if (v == value) then
-			return k
-		end
-	end
-
-	return nil
-end
-
 -- set a luup variable in both thermostat devices
 local function setLuupVariable(sid, variableName, value, deviceId)
 	luup.variable_set(sid, variableName, value, deviceId)
@@ -271,7 +243,7 @@ local function localizeTemp(temperature)
 	if (g_temperatureFormat == "F") then
 		return temperature
 	else
-		return round(((temperature + 0.0) - 32) * 5 / 9, 1)
+		return util.round(((temperature + 0.0) - 32) * 5 / 9, 1)
 	end
 end
 
@@ -281,7 +253,7 @@ local function delocalizeTemp(temperature)
 	if (g_temperatureFormat == "F") then
 		return temperature + 0
 	else
-		return round(((temperature + 0.0) * 9 / 5) + 32, 2)
+		return util.round(((temperature + 0.0) * 9 / 5) + 32, 2)
 	end
 end
 
@@ -444,11 +416,10 @@ local function initSettings(mode)
 		mode = util.getLuupVariable(USER_OPERATING_MODE_SID, "ModeStatus", g_deviceId, T_STRING)
 	end
 	local settings = {}
-	if (util.getLuupVariable(RTCOA_WIFI_SID, "ForceHold", g_deviceId, T_BOOLEAN)) then
-		settings.hold = 1
-	else
-		settings.hold = util.getLuupVariable(TEMPERATURE_HOLD_SID, "Status", g_deviceId, T_NUMBER)
-	end
+
+	settings.hold = util.getLuupVariable(TEMPERATURE_HOLD_SID, "Status", g_deviceId, T_NUMBER)
+	settings.tmode = util.findKeyByValue(TSTAT_API_TMODE, mode)
+
 	if (not util.getLuupVariable(RTCOA_WIFI_SID, "LooseTempControl", g_deviceId, T_BOOLEAN)) then
 		if (mode == "HeatOn") then
 			settings.t_heat = delocalizeTemp(util.getLuupVariable(HEAT_SETPOINT_SID, "CurrentSetpoint", g_deviceId, T_NUMBER))
@@ -456,13 +427,11 @@ local function initSettings(mode)
 			settings.t_cool = delocalizeTemp(util.getLuupVariable(COOL_SETPOINT_SID, "CurrentSetpoint", g_deviceId, T_NUMBER))
 		end
 	end
-	settings.tmode = findKeyByValue(TSTAT_API_TMODE, mode)
+	
 	return settings
 end
 
 --- Retrieve the current status from the thermostat, and store in the appropriate luup variabes.
--- In "ForceHold" mode, also checks to see if hold mode is off, and if so, turns it back on
--- and restores previous settings.
 -- @return true upon success, false upon failure
 local function retrieveThermostatStatus()
 
@@ -473,17 +442,6 @@ local function retrieveThermostatStatus()
 	end
 
 	g_thermostatTime = response.time
-
-	-- if we're in force hold mode, and hold is off,set hold on and restore the last setpoint (the
-	-- current setpoint would have been changed by the tstats internal program when hold was set to off)
-	if (util.getLuupVariable(RTCOA_WIFI_SID, "ForceHold", g_deviceId, T_BOOLEAN) and response.hold == 0) then
-		local settings = initSettings(TSTAT_API_TMODE[response.tmode])
-		callThermostatAPI(TSTAT_API_THERMOSTAT_PATH, isValidUpdateResponse, settings)
-		response = callThermostatAPI(TSTAT_API_THERMOSTAT_PATH, isValidStatusResponse)
-		if (response == nil) then
-			return false
-		end
-	end
 
 	setLuupVariable(TEMP_SENSOR_SID, "CurrentTemperature",  localizeTemp(response.temp), g_deviceId)
 
@@ -535,9 +493,9 @@ local function updateThermostatSetting(lul_settings, serviceId, action)
 			setLuupVariable(serviceId, "ModeStatus", lul_settings.NewModeTarget, g_deviceId)
 		end
 	elseif (serviceId == FAN_MODE_SID and action == "SetMode") then
-		setLuupVariable(serviceId, "Mode", lul_settings.NewModeTarget, g_deviceId)
+		setLuupVariable(serviceId, "Mode", lul_settings.NewMode, g_deviceId)
 		settings = initSettings()
-		settings.fmode = findKeyByValue(TSTAT_API_FMODE, lul_settings.NewMode)
+		settings.fmode = util.findKeyByValue(TSTAT_API_FMODE, lul_settings.NewMode)
 		success = callThermostatAPI(TSTAT_API_THERMOSTAT_PATH, isValidUpdateResponse, settings)
 	elseif (serviceId == HEAT_SETPOINT_SID and action == "SetCurrentSetpoint") then
 		setLuupVariable(serviceId, "CurrentSetpoint", lul_settings.NewCurrentSetpoint, g_deviceId)
@@ -715,7 +673,7 @@ end
 local function updateRemoteTemp ()
 	local params = {}
 	if (util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTempSet", g_deviceId, T_BOOLEAN)) then
-		params.rem_temp = round(delocalizeTemp(util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTemp", g_deviceId, T_NUMBER)), 1)
+		params.rem_temp = util.round(delocalizeTemp(util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTemp", g_deviceId, T_NUMBER)), 1)
 	else
 		params.rem_mode = 0
 	end
@@ -919,22 +877,6 @@ local function programSetpoints ()
 	end
 end
 
---- We had a "typo" in the RTCOA SID, so all the variables were
--- stored under the wrong SID in version 0.8 and earlier of the plug-in.
--- This function (somewhat) cleans up the old variables.
-local function cleanupVariable (variableName)
-	local oldValue = luup.variable_get(OLDEST_RTCOA_WIFI_SID, variableName, g_deviceId)
-	if (oldValue and oldValue ~= "") then
-		setLuupVariable(RTCOA_WIFI_SID, variableName, oldValue, g_deviceId)
-		setLuupVariable(OLDEST_RTCOA_WIFI_SID, variableName, "", g_deviceId)
-	end
-	local oldValue = luup.variable_get(OLDER_RTCOA_WIFI_SID, variableName, g_deviceId)
-	if (oldValue and oldValue ~= "") then
-		setLuupVariable(RTCOA_WIFI_SID, variableName, oldValue, g_deviceId)
-		setLuupVariable(OLDER_RTCOA_WIFI_SID, variableName, "", g_deviceId)
-	end
-end
-
 local function initGenericDeviceVariable(sid, variableName)
 	luup.variable_set(sid, variableName, luup.variable_get(sid, variableName, g_deviceId), g_genericDeviceId)
 end
@@ -954,33 +896,11 @@ end
 
 --- init Luup variables if they don't have values
 local function initLuupVariables()
-	-- cleanup some variables we had stored under the wrong SID
-	cleanupVariable("ThermostatName")
-	cleanupVariable("ThermostatUUID")
-	cleanupVariable("FirmwareVersion")
-	cleanupVariable("WLANFirmwareVersion")
-	cleanupVariable("APIVersion")
-	cleanupVariable("InitialPollDelay")
-	cleanupVariable("PollInterval")
-	cleanupVariable("ForceHold")
-	cleanupVariable("EnergyLEDColor")
-	cleanupVariable("EnergyLEDSet")
-	cleanupVariable("RemoteTempDevice")
-	cleanupVariable("RemoteTempSet")
-	cleanupVariable("RemoteTemp")
-	cleanupVariable("SyncClock")
-	cleanupVariable("ProgramSetpoints")
-	cleanupVariable("Programs")
-	cleanupVariable("PMAMessage")
-	cleanupVariable("PMALine")
-	cleanupVariable("PMASet")
-	cleanupVariable("PMATempDevice")
 
 	-- initialize state variables
 	util.initVariableIfNotSet(RTCOA_WIFI_SID, "CreateGenericDevice", 0, g_deviceId)
 
 	util.initVariableIfNotSet(RTCOA_WIFI_SID, "PollInterval", DEFAULT_POLL_INTERVAL, g_deviceId)
-	util.initVariableIfNotSet(RTCOA_WIFI_SID, "ForceHold", 0, g_deviceId)
 	util.initVariableIfNotSet(RTCOA_WIFI_SID, "SyncClock", 0, g_deviceId)
 	util.initVariableIfNotSet(RTCOA_WIFI_SID, "ProgramSetpoints", 0, g_deviceId)
 	util.initVariableIfNotSet(RTCOA_WIFI_SID, "LooseTempControl", 0, g_deviceId)
@@ -1136,7 +1056,7 @@ function syncClock ()
 		log.debug("Ready to sync thermostat clock in ",secondsUntilNextMinute," seconds")
 
 		luup.sleep(secondsUntilNextMinute * 1000)
-		thermostatTime = {}
+		local thermostatTime = {}
 		-- In thermostat API time, Sunday is day 6, Monday is day 0
 		-- In Lua API time, Sunday is day 1, Monday is day 2
 		thermostatTime.day = newTime.wday - 2
@@ -1166,55 +1086,10 @@ function syncClock ()
 	luup.call_delay("syncClock", timeToNextCall, g_deviceId, true)
 end
 
---- Initialize the thermostat plugin
-function thermostatInitialize(lul_device)
-	g_deviceId = tonumber(lul_device)
-	luup.attr_set("category_num", "5", lul_device)
 
-	log.setPrefix(LOG_PREFIX)
-	log.setLogFunction(util.luupLog)
-	log.addFilter(LOG_FILTER)
-
-	log.info ("Initializing thermostat module for device " , g_deviceId)
+function initializePhase2(lul_device)
+	log.info ("Initialize phase 2")
 	
-	-- set plugin version number
-	luup.variable_set(RTCOA_WIFI_SID, "PluginVersion", PLUGIN_VERSION, g_deviceId)
-	
-	http.TIMEOUT = 5
-
-	cleanupVariable("LogLevel")
-	util.initVariableIfNotSet(RTCOA_WIFI_SID, "LogLevel", log.LOG_LEVEL_INFO, g_deviceId)
-
-	log.setLevel(util.getLuupVariable(RTCOA_WIFI_SID, "LogLevel", g_deviceId, T_NUMBER))
-
-	-- get temperature format
-	local veraConfigData = doHttpRequest(g_configUrl)
-	if (veraConfigData) then
-		g_temperatureFormat = veraConfigData.temperature;
-		if (not g_temperatureFormat) then
-			g_temperatureFormat = "F"
-		end
-		log.info("Temperature Format = " , g_temperatureFormat)
-	else
-		local msg = "Unable to retrieve Vera temperature format"
-		log.error(msg)
-		return false, msg, "Radio Thermostat Wifi"
-	end
-
-	-- initalize Luup variables to sane values
-	initLuupVariables()
-
-	-- get ip address for thermostat
-	g_ipAddress = luup.devices[g_deviceId].ip
-
-	if (g_ipAddress and g_ipAddress ~= "") then
-		log.info("Using IP Address: " , g_ipAddress)
-	else
-		local msg = "No IP Address configured for thermostat"
-		log.error(msg)
-		return false, msg, "Radio Thermostat Wifi"
-	end
-
 	-- create the generic device (if enabled)
 	createGenericDevice()
 
@@ -1245,6 +1120,52 @@ function thermostatInitialize(lul_device)
 		-- start the clock sync loop as well
 		luup.call_delay("syncClock", initialPollDelay * 60, g_deviceId, true)
 	end
+end
+
+--- Initialize the thermostat plugin
+function initialize(lul_device)
+	g_deviceId = tonumber(lul_device)
+
+	luup.attr_set("category_num", "5", lul_device)
+
+	util.initLogging(LOG_PREFIX, LOG_FILTER, RTCOA_WIFI_SID, "LogLevel", g_deviceId)
+
+	log.info ("Initializing thermostat module for device " , g_deviceId)
+	
+	-- set plugin version number
+	luup.variable_set(RTCOA_WIFI_SID, "PluginVersion", PLUGIN_VERSION, g_deviceId)
+	
+	http.TIMEOUT = 5
+
+	-- get temperature format
+	local veraConfigData = doHttpRequest(g_configUrl)
+	if (veraConfigData) then
+		g_temperatureFormat = veraConfigData.temperature;
+		if (not g_temperatureFormat) then
+			g_temperatureFormat = "F"
+		end
+		log.info("Temperature Format = " , g_temperatureFormat)
+	else
+		local msg = "Unable to retrieve Vera temperature format"
+		log.error(msg)
+		return false, msg, "Radio Thermostat Wifi"
+	end
+
+	-- initalize Luup variables to sane values
+	initLuupVariables()
+
+	-- get ip address for thermostat
+	g_ipAddress = luup.devices[g_deviceId].ip
+
+	if (g_ipAddress and g_ipAddress ~= "") then
+		log.info("Using IP Address: " , g_ipAddress)
+	else
+		local msg = "No IP Address configured for thermostat"
+		log.error(msg)
+		return false, msg, "Radio Thermostat Wifi"
+	end
+
+	luup.call_delay("initializePhase2", 1, g_deviceId, true)
 
 	log.info("Done with initialization")
 end
@@ -1297,8 +1218,7 @@ end
 
 -- RETURN GLOBAL FUNCTIONS
 return {
-	thermostatInitialize=thermostatInitialize,
-	thermostatPoller=thermostatPoller,
+	initialize=initialize,
 	dispatchJob=dispatchJob,
 	setConfigUrl=setConfigUrl
 }

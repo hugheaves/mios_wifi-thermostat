@@ -22,46 +22,50 @@
 		<protocol>raw</protocol>
 	</settings>
 	<functions>
-		-- Using "require" to access compressed modules doesn't work if the 
-		-- module is declared without using the "module" function.
-		-- (see http://bugs.micasaverde.com/view.php?id=2276 )
-		--
-		-- We work around this with a shell script that executes pluto-lzo
-		-- to decompress the module. The temp file is used to
-		-- avoid a race condition when multiple instances of this module
-		-- start at the same time. (to prevent one instance from loading a 
-		-- partially decompressed file from another instance)
+		local lfs = require("lfs")
 
-		local decompressScript = [[
-decompress_lzo_file() {
-	SRC_FILE=/etc/cmh-ludl/$1.lzo
-	DEST_FILE=/etc/cmh-ludl/$1
-	if [ ! -e $DEST_FILE -o $SRC_FILE -nt $DEST_FILE ]
-	then
-		TEMP_FILE=$(mktemp)
-		pluto-lzo d $SRC_FILE $TEMP_FILE
-		mv $TEMP_FILE $DEST_FILE
-	fi
-}
-]]
+		function loadModule(moduleName)
+			local srcFile = "/etc/cmh-ludl/" .. moduleName .. ".lua.lzo"
+			local destFile = "/etc/cmh-ludl/" .. moduleName .. ".lua"
+			local srcFileModified = lfs.attributes (srcFile, "modification")
+			local destFileModified = lfs.attributes (destFile, "modification")
+	
+			luup.log("srcFile = " .. (srcFile or "nil"))
+			luup.log("destFile = " .. (destFile or "nil"))
+			luup.log("srcFileModified = " .. (srcFileModified or "nil"))
+			luup.log("destFileModified = " .. (destFileModified or "nil"))
+	
+			if (not destFileModified or os.difftime(srcFileModified, destFileModified) > 0) then
+				local tempFile = os.tmpname()
+				local commandLine = "pluto-lzo d " .. srcFile .. " " .. tempFile
+				luup.log ("commandLine = " .. commandLine)
+				local result = os.execute(commandLine)
+				luup.log ("os.execute result = " .. (result or "nil"))
+				commandLine = "mv " .. tempFile .. " " .. destFile
+				luup.log ("commandLine = " .. commandLine)
+				result = os.execute(commandLine)
+				luup.log ("os.execute result = " .. (result or "nil"))
+			end
+	
+			return require(moduleName)
+		end
+	
+		g_dkjson = loadModule("L_RTCOA_Wifi_dkjson")
+		g_log = loadModule("L_RTCOA_Wifi_log")
+		g_util = loadModule("L_RTCOA_Wifi_util")
+		g_core = loadModule("L_RTCOA_Wifi_core")
 
-		os.execute(decompressScript .. "decompress_lzo_file L_RTCOA_Wifi_core.lua")
-		os.execute(decompressScript .. "decompress_lzo_file L_RTCOA_Wifi_dkjson.lua")
-		os.execute(decompressScript .. "decompress_lzo_file L_RTCOA_Wifi_log.lua")
-		os.execute(decompressScript .. "decompress_lzo_file L_RTCOA_Wifi_util.lua")
-
-		core = require("L_RTCOA_Wifi_core")
-		function thermostatInitialize(lul_device)
-			core.thermostatInitialize(lul_device)
+		function initialize(lul_device)
+			g_core.initialize(lul_device)
 		end
 	</functions>
-	<startup>thermostatInitialize</startup>
+	<startup>initialize</startup>
 	<actionList>
 		<action>
 			<serviceId>urn:upnp-org:serviceId:TemperatureSetpoint1_Heat</serviceId>
 			<name>SetCurrentSetpoint</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:upnp-org:serviceId:TemperatureSetpoint1_Heat", "SetCurrentSetpoint")
 			</job>
 		</action>
@@ -69,7 +73,7 @@ decompress_lzo_file() {
 			<serviceId>urn:upnp-org:serviceId:TemperatureSetpoint1_Cool</serviceId>
 			<name>SetCurrentSetpoint</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:upnp-org:serviceId:TemperatureSetpoint1_Cool", "SetCurrentSetpoint")
 			</job>
 		</action>
@@ -77,7 +81,7 @@ decompress_lzo_file() {
 			<serviceId>urn:upnp-org:serviceId:HVAC_UserOperatingMode1</serviceId>
 			<name>SetModeTarget</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", "SetModeTarget")
 			</job>
 		</action>
@@ -85,7 +89,7 @@ decompress_lzo_file() {
 			<serviceId>urn:upnp-org:serviceId:HVAC_UserOperatingMode1</serviceId>
 			<name>SetEnergyModeTarget</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:upnp-org:serviceId:HVAC_UserOperatingMode1", "SetEnergyModeTarget")
 			</job>
 		</action>
@@ -93,7 +97,7 @@ decompress_lzo_file() {
 			<serviceId>urn:upnp-org:serviceId:HVAC_FanOperatingMode1</serviceId>
 			<name>SetMode</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:upnp-org:serviceId:HVAC_FanOperatingMode1", "SetMode")
 			</job>
 		</action>
@@ -101,7 +105,7 @@ decompress_lzo_file() {
 			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_TemperatureHold1</serviceId>
 			<name>SetTarget</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:hugheaves-com:serviceId:HVAC_RTCOA_TemperatureHold1", "SetTarget")
 			</job>
 		</action>
@@ -109,7 +113,7 @@ decompress_lzo_file() {
 			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
 			<name>SetEnergyLED</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "SetEnergyLED")
 			</job>			
 		</action>
@@ -117,7 +121,7 @@ decompress_lzo_file() {
 			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
 			<name>ResetEnergyLED</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "ResetEnergyLED")
 			</job>			
 		</action>
@@ -125,7 +129,7 @@ decompress_lzo_file() {
 			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
 			<name>SetRemoteTemp</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "SetRemoteTemp")
 			</job>			
 		</action>
@@ -133,7 +137,7 @@ decompress_lzo_file() {
 			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
 			<name>ResetRemoteTemp</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "ResetRemoteTemp")
 			</job>			
 		</action>
@@ -141,7 +145,7 @@ decompress_lzo_file() {
 			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
 			<name>SetPMA</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "SetPMA")
 			</job>			
 		</action>
@@ -149,7 +153,7 @@ decompress_lzo_file() {
 			<serviceId>urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1</serviceId>
 			<name>ResetPMA</name>
 			<job>
-				return core.dispatchJob(lul_device, lul_settings, lul_job,
+				return g_core.dispatchJob(lul_device, lul_settings, lul_job,
 				"urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1", "ResetPMA")
 			</job>			
 		</action>
