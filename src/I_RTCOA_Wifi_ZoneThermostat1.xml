@@ -22,38 +22,10 @@
 		<protocol>raw</protocol>
 	</settings>
 	<functions>
-		local lfs = require("lfs")
-
-		function loadModule(moduleName)
-			local srcFile = "/etc/cmh-ludl/" .. moduleName .. ".lua.lzo"
-			local destFile = "/etc/cmh-ludl/" .. moduleName .. ".lua"
-			local srcFileModified = lfs.attributes (srcFile, "modification")
-			local destFileModified = lfs.attributes (destFile, "modification")
-	
-			luup.log("srcFile = " .. (srcFile or "nil"))
-			luup.log("destFile = " .. (destFile or "nil"))
-			luup.log("srcFileModified = " .. (srcFileModified or "nil"))
-			luup.log("destFileModified = " .. (destFileModified or "nil"))
-	
-			if (not destFileModified or os.difftime(srcFileModified, destFileModified) > 0) then
-				local tempFile = os.tmpname()
-				local commandLine = "pluto-lzo d " .. srcFile .. " " .. tempFile
-				luup.log ("commandLine = " .. commandLine)
-				local result = os.execute(commandLine)
-				luup.log ("os.execute result = " .. (result or "nil"))
-				commandLine = "mv " .. tempFile .. " " .. destFile
-				luup.log ("commandLine = " .. commandLine)
-				result = os.execute(commandLine)
-				luup.log ("os.execute result = " .. (result or "nil"))
-			end
-	
-			return require(moduleName)
-		end
-	
-		g_dkjson = loadModule("L_RTCOA_Wifi_dkjson")
-		g_log = loadModule("L_RTCOA_Wifi_log")
-		g_util = loadModule("L_RTCOA_Wifi_util")
-		g_core = loadModule("L_RTCOA_Wifi_core")
+		g_dkjson = require("L_RTCOA_Wifi_dkjson")
+		g_log = require("L_RTCOA_Wifi_log")
+		g_util = require("L_RTCOA_Wifi_util")
+		g_core = require("L_RTCOA_Wifi_core")
 
 		function initialize(lul_device)
 			g_core.initialize(lul_device)
