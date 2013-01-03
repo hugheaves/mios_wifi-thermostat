@@ -31,13 +31,7 @@ local http = require("socket.http")
 -- CONSTANTS
 
 -- Plug-in version
-local PLUGIN_VERSION = "2.2"
-
--- assign a few from util module to reduce verbosity
-
-local T_NUMBER = util.T_NUMBER
-local T_BOOLEAN = util.T_BOOLEAN
-local T_STRING = util.T_STRING
+local PLUGIN_VERSION = "2.3"
 
 local DEFAULT_POLL_INTERVAL = 60
 
@@ -47,15 +41,22 @@ local LOG_PREFIX = "RTCOA"
 
 local DEFAULT_VERA_CONFIG_URL = "http://localhost:3480/data_request?id=lu_sdata"
 
-local LOG_FILTER = {
-["L_RTCOA_Wifi_core.lua$"] = {
-		"isValidAPIParameterValue",
-		"cleanupVariable"
-	},
-["L_RTCOA_Wifi_util.lua$"] = {
-		"g_logFunc"
+local DEFAULT_LOG_CONFIG = {
+	["version"] = 1,
+	["files"] = {
+		["./*L_RTCOA_Wifi_log.lua$"] = {
+			["level"] = log.LOG_LEVEL_INFO,
+			["functions"] = {
+			}
+		},
+		["./*L_RTCOA_Wifi_util.lua$"] = {
+			["level"] = log.LOG_LEVEL_INFO,
+			["functions"] = {
+			}
+		},
 	}
 }
+
 
 -----------------------------------------------
 ----- Define some LUUP constants --------------
@@ -154,83 +155,43 @@ local TSTAT_API_PROGRAM_PATH = "/tstat/program"
 -- SID: urn:upnp-org:serviceId:HVAC_UserOperatingMode1
 -- VARIABLE: ModeTarget
 local TSTAT_API_TMODE = {
-[0] = "Off",
-[1] = "HeatOn",
-[2] = "CoolOn",
-[3] = "AutoChangeOver"
+	[0] = "Off",
+	[1] = "HeatOn",
+	[2] = "CoolOn",
+	[3] = "AutoChangeOver"
 }
 
 -- SID: urn:upnp-org:serviceId:HVAC_UserOperatingMode1
 -- VARIABLE: ModeStatus
 local TSTAT_API_TSTATE = {
-[0] = "Idle",
-[1] = "Heating",
-[2] = "Cooling"
+	[0] = "Idle",
+	[1] = "Heating",
+	[2] = "Cooling"
 }
 
 -- SID: urn:upnp-org:serviceId:HVAC_FanOperatingMode1
 -- VARIABLE: Mode
 local TSTAT_API_FMODE = {
-[0] = "Auto",
-[1] = "PeriodicOn",
-[2] = "ContinuousOn"
+	[0] = "Auto",
+	[1] = "PeriodicOn",
+	[2] = "ContinuousOn"
 }
 
 -- urn:upnp-org:serviceId:HVAC_FanOperatingMode1
 -- VARIABLE: FanStatus
 local TSTAT_API_FSTATE = {
-[0] = "Off",
-[1] = "On"
+	[0] = "Off",
+	[1] = "On"
 }
 
 -- set a luup variable in both thermostat devices
 local function setLuupVariable(sid, variableName, value, deviceId)
 	luup.variable_set(sid, variableName, value, deviceId)
 	if (g_genericDeviceId and deviceId == g_deviceId and GENERIC_DEVICE_SIDS[sid]) then
-		luup.variable_set(sid, variableName, value, g_genericDeviceId)
+		util.setLuupVariable(sid, variableName, value, g_genericDeviceId)
 	elseif (deviceId == g_genericDeviceId) then
-		luup.variable_set(sid, variableName, value, g_deviceId)
+		util.setLuupVariable(sid, variableName, value, g_deviceId)
 	end
-end
-
-------------------------------------------------------
--------- HTTP / JSON communcation functions ----------
-------------------------------------------------------
-
---- Send a request to to a URL with optional requestParameters that will be JSON encoded.
--- Expects a JSON formatted response that will be decoded into a Lua table
--- @return response - a table of the decoded JSON response, or nil if failed
-local function doHttpRequest(url, requestParameters)
-	local postData = nil
-	local response = nil
-
-	if (requestParameters ~= nil) then
-		log.debug ("requestParameters = " , requestParameters)
-		postData = json.encode (requestParameters)
-	end
-
-	log.debug("Making HTTP request: ", "url = ",url, ", postData = ",postData)
-	local body, status, headers = http.request(url, postData)
-
-	if (body == nil or status == nil or headers == nil or status ~= 200) then
-		log.error ("Received bad HTTP response")
-		log.error ("URL: " ,url)
-		log.error ("postData: ",postData)
-		log.error ("Status: ",status)
-		log.error ("Body: " ,body)
-		log.error ("Headers: ",headers)
-	else
-		log.debug ("Received good HTTP response")
-		log.debug ("URL: " ,url)
-		log.debug ("postData: ",postData)
-		log.debug ("Status: ",status)
-		log.debug ("Body: " ,body)
-		log.debug ("Headers: ",headers)
-		response = json.decode(body)
-		log.debug ("Parsed response: ",response)
-	end
-
-	return response
 end
 
 -------------------------------------------
@@ -265,7 +226,10 @@ end
 -- @parameter noRetry
 -- @return response - the JSON response decoded into a Lua table, or nil if failed
 local function callThermostatAPI(path, responseValidationFunction, requestParameters, noRetry)
-	log.info("Calling thermostat API, path = ",path,", requestParameters = ",requestParameters,", noRetry = ", noRetry)
+	local url = "http://" .. g_ipAddress .. path
+
+	log.info("Calling thermostat API, url = ",url,", requestParameters = ",requestParameters,", noRetry = ", noRetry)
+
 	local retries = 0
 	local numRetries = DEFAULT_NUM_RETRIES
 
@@ -275,19 +239,19 @@ local function callThermostatAPI(path, responseValidationFunction, requestParame
 
 	repeat
 		-- if this is a retry, then we wait a little
-		luup.sleep(retries * 500)
+		luup.sleep(retries * 1000)
 		if (retries > 0) then
-			log.info("retrying request, path = ", path, ", retry #", retries)
+			log.info("retrying request, url = ", url, ", retry #", retries)
 		end
 
-		local response = doHttpRequest ("http://" .. g_ipAddress .. path, requestParameters)
+		local response = util.httpGetJSON (url, requestParameters)
 		if (not response) then
-			log.error ("Received no response (timeout?), path = ", path)
+			log.error ("Received no response (timeout?), url = ", url)
 		elseif (responseValidationFunction(response)) then
-			log.info ("Received succesful response, path = ", path, ", response = ", response)
+			log.info ("Received succesful response, url = ", url, ", response = ", response)
 			return (response)
 		else
-			log.error ("Received invalid response, path = ", path, ", response = ", response)
+			log.error ("Received invalid response, url = ", url, ", response = ", response)
 		end
 
 		retries = retries + 1
@@ -413,25 +377,31 @@ end
 
 local function initSettings(mode)
 	if (not mode) then
-		mode = util.getLuupVariable(USER_OPERATING_MODE_SID, "ModeStatus", g_deviceId, T_STRING)
+		mode = util.getLuupVariable(USER_OPERATING_MODE_SID, "ModeStatus", g_deviceId, util.T_STRING)
 	end
 	local settings = {}
+	if (util.getLuupVariable(RTCOA_WIFI_SID, "ForceHold", g_deviceId, util.T_BOOLEAN)) then
+		settings.hold = 1
+	else
+		settings.hold = util.getLuupVariable(TEMPERATURE_HOLD_SID, "Status", g_deviceId, util.T_NUMBER)
+	end
 
-	settings.hold = util.getLuupVariable(TEMPERATURE_HOLD_SID, "Status", g_deviceId, T_NUMBER)
 	settings.tmode = util.findKeyByValue(TSTAT_API_TMODE, mode)
 
-	if (not util.getLuupVariable(RTCOA_WIFI_SID, "LooseTempControl", g_deviceId, T_BOOLEAN)) then
+	if (not util.getLuupVariable(RTCOA_WIFI_SID, "LooseTempControl", g_deviceId, util.T_BOOLEAN)) then
 		if (mode == "HeatOn") then
-			settings.t_heat = delocalizeTemp(util.getLuupVariable(HEAT_SETPOINT_SID, "CurrentSetpoint", g_deviceId, T_NUMBER))
+			settings.t_heat = delocalizeTemp(util.getLuupVariable(HEAT_SETPOINT_SID, "CurrentSetpoint", g_deviceId, util.T_NUMBER))
 		elseif (mode == "CoolOn") then
-			settings.t_cool = delocalizeTemp(util.getLuupVariable(COOL_SETPOINT_SID, "CurrentSetpoint", g_deviceId, T_NUMBER))
+			settings.t_cool = delocalizeTemp(util.getLuupVariable(COOL_SETPOINT_SID, "CurrentSetpoint", g_deviceId, util.T_NUMBER))
 		end
 	end
-	
+
 	return settings
 end
 
 --- Retrieve the current status from the thermostat, and store in the appropriate luup variabes.
+-- In "ForceHold" mode, also checks to see if hold mode is off, and if so, turns it back on
+-- and restores previous settings.
 -- @return true upon success, false upon failure
 local function retrieveThermostatStatus()
 
@@ -442,6 +412,17 @@ local function retrieveThermostatStatus()
 	end
 
 	g_thermostatTime = response.time
+
+	-- if we're in force hold mode, and hold is off,set hold on and restore the last setpoint (the
+	-- current setpoint would have been changed by the tstats internal program when hold was set to off)
+	if (util.getLuupVariable(RTCOA_WIFI_SID, "ForceHold", g_deviceId, util.T_BOOLEAN) and response.hold == 0) then
+		local settings = initSettings(TSTAT_API_TMODE[response.tmode])
+		callThermostatAPI(TSTAT_API_THERMOSTAT_PATH, isValidUpdateResponse, settings)
+		response = callThermostatAPI(TSTAT_API_THERMOSTAT_PATH, isValidStatusResponse)
+		if (response == nil) then
+			return false
+		end
+	end
 
 	setLuupVariable(TEMP_SENSOR_SID, "CurrentTemperature",  localizeTemp(response.temp), g_deviceId)
 
@@ -499,14 +480,14 @@ local function updateThermostatSetting(lul_settings, serviceId, action)
 		success = callThermostatAPI(TSTAT_API_THERMOSTAT_PATH, isValidUpdateResponse, settings)
 	elseif (serviceId == HEAT_SETPOINT_SID and action == "SetCurrentSetpoint") then
 		setLuupVariable(serviceId, "CurrentSetpoint", lul_settings.NewCurrentSetpoint, g_deviceId)
-		if (util.getLuupVariable(USER_OPERATING_MODE_SID, "ModeStatus", g_deviceId, T_STRING) == "HeatOn") then
+		if (util.getLuupVariable(USER_OPERATING_MODE_SID, "ModeStatus", g_deviceId, util.T_STRING) == "HeatOn") then
 			settings = initSettings()
 			settings.t_heat = delocalizeTemp(lul_settings.NewCurrentSetpoint)
 			success = callThermostatAPI(TSTAT_API_THERMOSTAT_PATH, isValidUpdateResponse, settings)
 		end
 	elseif (serviceId == COOL_SETPOINT_SID and action == "SetCurrentSetpoint") then
 		setLuupVariable(serviceId, "CurrentSetpoint", lul_settings.NewCurrentSetpoint, g_deviceId)
-		if (util.getLuupVariable(USER_OPERATING_MODE_SID, "ModeStatus", g_deviceId, T_STRING) == "CoolOn") then
+		if (util.getLuupVariable(USER_OPERATING_MODE_SID, "ModeStatus", g_deviceId, util.T_STRING) == "CoolOn") then
 			settings = initSettings()
 			settings.t_cool = delocalizeTemp(lul_settings.NewCurrentSetpoint)
 			success = callThermostatAPI(TSTAT_API_THERMOSTAT_PATH, isValidUpdateResponse, settings)
@@ -541,6 +522,9 @@ local function retrieveThermostatMetadata()
 		return false
 	end
 
+	-- sending multiple requests in rapid succession seems to crash the thermostat.
+	-- so, we wait a little before the next call
+	luup.sleep(2000);
 	response = callThermostatAPI(TSTAT_API_SYSTEM_PATH, isValidSysResponse, requestParameters)
 	if (response ~= nil) then
 		setLuupVariable(RTCOA_WIFI_SID, "ThermostatUUID", response.uuid, g_deviceId)
@@ -551,6 +535,7 @@ local function retrieveThermostatMetadata()
 		return false
 	end
 
+	luup.sleep(2000);
 	response = callThermostatAPI(TSTAT_API_SYSTEM_NAME_PATH, isValidNameResponse, requestParameters)
 	if (response ~= nil) then
 		setLuupVariable(RTCOA_WIFI_SID, "ThermostatName", response.name, g_deviceId)
@@ -577,9 +562,9 @@ end
 -- "EnergyLEDSet" is true
 local function updateEnergyLED ()
 	-- If "EnergyLEDSet" is true, set the LED color
-	if (util.getLuupVariable(RTCOA_WIFI_SID, "EnergyLEDSet", g_deviceId, T_BOOLEAN)) then
+	if (util.getLuupVariable(RTCOA_WIFI_SID, "EnergyLEDSet", g_deviceId, util.T_BOOLEAN)) then
 
-		local color = util.getLuupVariable(RTCOA_WIFI_SID, "EnergyLEDColor", g_deviceId, T_STRING)
+		local color = util.getLuupVariable(RTCOA_WIFI_SID, "EnergyLEDColor", g_deviceId, util.T_STRING)
 		local value = 0
 		if (color == "Green") then
 			value = 1
@@ -619,9 +604,9 @@ end
 -- if "PMASet" is true
 local function updatePMA ()
 	local params = {}
-	if (util.getLuupVariable(RTCOA_WIFI_SID, "PMASet", g_deviceId, T_BOOLEAN)) then
-		params.message = util.getLuupVariable(RTCOA_WIFI_SID, "PMAMessage", g_deviceId, T_STRING)
-		params.line = util.getLuupVariable(RTCOA_WIFI_SID, "PMALine", g_deviceId, T_NUMBER)
+	if (util.getLuupVariable(RTCOA_WIFI_SID, "PMASet", g_deviceId, util.T_BOOLEAN)) then
+		params.message = util.getLuupVariable(RTCOA_WIFI_SID, "PMAMessage", g_deviceId, util.T_STRING)
+		params.line = util.getLuupVariable(RTCOA_WIFI_SID, "PMALine", g_deviceId, util.T_NUMBER)
 	else
 		params.mode = 0
 	end
@@ -652,9 +637,9 @@ end
 --- Reads the temperature from the configured PMA temperature device,
 -- and sets the PMA to display the current temperature value.
 local function updatePMATempFromTempDevice()
-	local tempDevice = util.getLuupVariable(RTCOA_WIFI_SID, "PMATempDevice", g_deviceId, T_NUMBER)
+	local tempDevice = util.getLuupVariable(RTCOA_WIFI_SID, "PMATempDevice", g_deviceId, util.T_NUMBER)
 	if (tempDevice > 0) then
-		local temp = util.getLuupVariable(TEMP_SENSOR_SID, "CurrentTemperature", tempDevice, T_NUMBER)
+		local temp = util.getLuupVariable(TEMP_SENSOR_SID, "CurrentTemperature", tempDevice, util.T_NUMBER)
 		if (temp) then
 			log.info("Pulled PMA temperature ", temp, " from device ", tempDevice)
 			-- can't display negative values in the PMA, so we add an extra
@@ -672,8 +657,8 @@ end
 --- Sends the current remote temperature variable value to the thermostat
 local function updateRemoteTemp ()
 	local params = {}
-	if (util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTempSet", g_deviceId, T_BOOLEAN)) then
-		params.rem_temp = util.round(delocalizeTemp(util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTemp", g_deviceId, T_NUMBER)), 1)
+	if (util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTempSet", g_deviceId, util.T_BOOLEAN)) then
+		params.rem_temp = util.round(delocalizeTemp(util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTemp", g_deviceId, util.T_NUMBER)), 1)
 	else
 		params.rem_mode = 0
 	end
@@ -700,9 +685,9 @@ end
 
 --- Update the remote temp value from the configured remote temperature device
 local function updateRemoteTempFromTempDevice()
-	local tempDevice = util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTempDevice", g_deviceId, T_NUMBER)
+	local tempDevice = util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTempDevice", g_deviceId, util.T_NUMBER)
 	if (tempDevice > 0) then
-		local temp = util.getLuupVariable(TEMP_SENSOR_SID, "CurrentTemperature", tempDevice, T_NUMBER)
+		local temp = util.getLuupVariable(TEMP_SENSOR_SID, "CurrentTemperature", tempDevice, util.T_NUMBER)
 		if (temp) then
 			log.info("Pulled remote temperature ", temp, " from device ", tempDevice)
 			setLuupVariable(RTCOA_WIFI_SID, "RemoteTemp", temp, g_deviceId)
@@ -749,43 +734,38 @@ end
 
 --- Updates the cached thermostat programs. The reason we even cache the current programs
 -- is that the thermostat does nasty things (rapid cycling control relay on/off) when we call the
--- API to retreive (_not set_!!) the current program. It's a serious firmware bug in the
+-- API to retrieve (_not set_!!) the current program. It's a serious firmware bug in the
 -- thermostat, but it looks like it's not getting fixed. So, we avoid calling the thermostat
 -- "get program" API at all costs and just rely on the cached copy.
 local function updateProgramCache()
 	local programTypes = { ["heat"] = "heat", ["cool"] = "cool"}
 
 	if (g_programs == nil) then
-		log.debug ("setting up g_programs")
-		if (not util.getLuupVariable(RTCOA_WIFI_SID, "ProgramSetpoints", g_deviceId, T_BOOLEAN)) then
+		log.debug ("Initializing g_programs")
+		if (not util.getLuupVariable(RTCOA_WIFI_SID, "ProgramSetpoints", g_deviceId, util.T_BOOLEAN)) then
 			log.debug("ProgramSetpoints disabled, clearing cached programs")
 			g_programs = ""
 			setLuupVariable(RTCOA_WIFI_SID, "Programs", "", g_deviceId)
 		else
-			local programsVar = util.getLuupVariable(RTCOA_WIFI_SID, "Programs", g_deviceId, T_STRING)
-			log.debug("programsVar: ", programsVar)
+		    g_programs = util.getLuupVariable(RTCOA_WIFI_SID, "Programs", g_deviceId, util.T_TABLE)
+			log.debug("Current program cache: ", g_programs)
 
-			if (programsVar and programsVar ~= "") then
-				g_programs = json.decode(programsVar)
-			else
+			if (not g_programs) then
 				log.debug ("Retrieving current programs from thermostat")
 				local programs = {}
 				for programType, variable in pairs(programTypes) do
 					local path = TSTAT_API_PROGRAM_PATH .. "/" .. programType
-					local oldTimeout = http.TIMEOUT
-					http.TIMEOUT = 10
 					local result = callThermostatAPI(path, isValidProgramResponse)
-					http.TIMEOUT = oldTimeout
 					if (result) then
 						programs[programType] = result
 					else
 						return false
 					end
 				end
-				setLuupVariable(RTCOA_WIFI_SID, "Programs", json.encode(programs), g_deviceId)
+				setLuupVariable(RTCOA_WIFI_SID, "Programs", programs, g_deviceId)
 				g_programs = programs
 			end
-			log.debug ("g_programs = ", g_programs)
+			log.debug ("New Programs = ", g_programs)
 		end
 	end
 
@@ -832,7 +812,7 @@ local function checkAndUpdateProgram(programType, day, setPoint)
 		if (callThermostatAPI(path, isValidUpdateResponse, { [tostring(day)] = newProgram })) then
 			log.info ("Updated thermostat program to ", newProgram)
 			g_programs[programType][tostring(day)] = newProgram
-			setLuupVariable(RTCOA_WIFI_SID, "Programs", json.encode(g_programs), g_deviceId)
+			setLuupVariable(RTCOA_WIFI_SID, "Programs", g_programs, g_deviceId)
 		else
 			return false
 		end
@@ -847,15 +827,18 @@ end
 local function programSetpoints ()
 	local programTypes = { ["heat"] = HEAT_SETPOINT_SID, ["cool"] = COOL_SETPOINT_SID }
 
+	log.debug ("Entering programSetpoints()")
+
 	updateProgramCache()
 
 	if (g_programs and g_programs ~= "") then
 		if (g_thermostatTime == nil) then
+			log.debug ("g_thermostatTime is null - can't program setpoints")
 			return false
 		end
 
 		local secondsUntilMidnight = 86400 - ((g_thermostatTime.hour * 60 + g_thermostatTime.minute) * 60)
-		local pollInterval = util.getLuupVariable(RTCOA_WIFI_SID, "PollInterval", g_deviceId, T_NUMBER)
+		local pollInterval = util.getLuupVariable(RTCOA_WIFI_SID, "PollInterval", g_deviceId, util.T_NUMBER)
 		local nextDay = nil
 		-- if we're within five polling intervals of the end of the day, check tomorrows schedule as well
 		if (secondsUntilMidnight <= (pollInterval * 5)) then
@@ -866,7 +849,7 @@ local function programSetpoints ()
 		end
 
 		for programType, sid in pairs(programTypes) do
-			local setPoint = util.getLuupVariable(sid, "CurrentSetpoint", g_deviceId, T_NUMBER)
+			local setPoint = util.getLuupVariable(sid, "CurrentSetpoint", g_deviceId, util.T_NUMBER)
 
 			checkAndUpdateProgram(programType, g_thermostatTime.day, setPoint)
 
@@ -920,6 +903,10 @@ local function initLuupVariables()
 	util.initVariableIfNotSet(RTCOA_WIFI_SID, "RemoteTempSet", 0, g_deviceId)
 	util.initVariableIfNotSet(RTCOA_WIFI_SID, "RemoteTemp", 0, g_deviceId)
 
+	util.initVariableIfNotSet(RTCOA_WIFI_SID, "IPAddress", "0.0.0.0", g_deviceId)
+
+	util.initVariableIfNotSet(RTCOA_WIFI_SID, "ForceHold", 0, g_deviceId)
+
 	util.initVariableIfNotSet(TEMP_SENSOR_SID, "CurrentTemperature",  0, g_deviceId)
 	util.initVariableIfNotSet(USER_OPERATING_MODE_SID, "ModeTarget", "Off", g_deviceId)
 	util.initVariableIfNotSet(USER_OPERATING_MODE_SID, "ModeStatus", "Off", g_deviceId)
@@ -933,12 +920,12 @@ local function initLuupVariables()
 	util.initVariableIfNotSet(TEMPERATURE_HOLD_SID, "Status", 0, g_deviceId)
 
 	util.initVariableIfNotSet(MCV_OPERATING_STATE_SID, "ModeState", "Off", g_deviceId)
-	
+
 	util.initVariableIfNotSet(MCV_ENERGY_METERING_SID, "UserSuppliedWattage", "0,0,0", g_deviceId)
 end
 
 local function createGenericDevice()
-	if (util.getLuupVariable(RTCOA_WIFI_SID, "CreateGenericDevice", g_deviceId, T_BOOLEAN)) then
+	if (util.getLuupVariable(RTCOA_WIFI_SID, "CreateGenericDevice", g_deviceId, util.T_BOOLEAN)) then
 		-- Create / sync the "generic" thermostat device
 		local deviceName = luup.devices[g_deviceId].description;
 		local rootPtr = luup.chdev.start(g_deviceId)
@@ -954,7 +941,7 @@ local function createGenericDevice()
 				log.info ("Found child generic thermostat device: deviceId = ", deviceId, ", device = ", device)
 			end
 		end
-		
+
 		initGenericDeviceVariables()
 	end
 end
@@ -985,7 +972,7 @@ end
 
 -- main "polling" function to update and monitor the thermostat settings
 function thermostatPoller(pollAgain)
-	log.setLevel(util.getLuupVariable(RTCOA_WIFI_SID, "LogLevel", g_deviceId, T_NUMBER))
+	log.setLevel(util.getLuupVariable(RTCOA_WIFI_SID, "LogLevel", g_deviceId, util.T_NUMBER))
 
 	log.info ("Polling device " , g_deviceId, ", pollAgain = ", pollAgain)
 
@@ -1023,7 +1010,7 @@ function thermostatPoller(pollAgain)
 	end
 
 	if (pollAgain and pollAgain == "true") then
-		local pollInterval = util.getLuupVariable(RTCOA_WIFI_SID, "PollInterval", g_deviceId, T_NUMBER)
+		local pollInterval = util.getLuupVariable(RTCOA_WIFI_SID, "PollInterval", g_deviceId, util.T_NUMBER)
 		luup.call_delay("thermostatPoller", pollInterval, "true", true)
 	end
 
@@ -1086,59 +1073,23 @@ function syncClock ()
 	luup.call_delay("syncClock", timeToNextCall, g_deviceId, true)
 end
 
-
-function initializePhase2(lul_device)
-	log.info ("Initialize phase 2")
-	
-	-- create the generic device (if enabled)
-	createGenericDevice()
-
-	-- retrieve the thermostat metadata (firmware version, model, etc.)
-	retrieveThermostatMetadata()
-
-	-- retrieve current thermostat status
-	retrieveThermostatStatus()
-
-	local pmaTempDevice = util.getLuupVariable(RTCOA_WIFI_SID, "PMATempDevice", g_deviceId, T_NUMBER)
-	if (pmaTempDevice > 0) then
-		log.info ("Registering PMA temperature callback, device = ", pmaTempDevice)
-		luup.variable_watch("pmaTempCallback", TEMP_SENSOR_SID, "CurrentTemperature", pmaTempDevice)
-	end
-
-	local remoteTempDevice = util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTempDevice", g_deviceId, T_NUMBER)
-	if (remoteTempDevice > 0) then
-		log.info ("Registering remote temperature callback, device = ", remoteTempDevice)
-		luup.variable_watch("remoteTempCallback", TEMP_SENSOR_SID, "CurrentTemperature", remoteTempDevice)
-	end
-
-	local initialPollDelay = util.getLuupVariable(RTCOA_WIFI_SID, "InitialPollDelay", g_deviceId, T_NUMBER)
-
-	-- start the polling loop after the user specified delay
-	luup.call_delay("thermostatPoller", initialPollDelay, "true", true)
-
-	if (util.getLuupVariable(RTCOA_WIFI_SID, "SyncClock", g_deviceId, T_BOOLEAN)) then
-		-- start the clock sync loop as well
-		luup.call_delay("syncClock", initialPollDelay * 60, g_deviceId, true)
-	end
-end
-
 --- Initialize the thermostat plugin
 function initialize(lul_device)
 	g_deviceId = tonumber(lul_device)
 
 	luup.attr_set("category_num", "5", lul_device)
 
-	util.initLogging(LOG_PREFIX, LOG_FILTER, RTCOA_WIFI_SID, "LogLevel", g_deviceId)
+	util.initLogging(LOG_PREFIX, LOG_FILTER, RTCOA_WIFI_SID, g_deviceId)
 
 	log.info ("Initializing thermostat module for device " , g_deviceId)
-	
+
 	-- set plugin version number
 	luup.variable_set(RTCOA_WIFI_SID, "PluginVersion", PLUGIN_VERSION, g_deviceId)
-	
-	http.TIMEOUT = 5
+
+	http.TIMEOUT = 10
 
 	-- get temperature format
-	local veraConfigData = doHttpRequest(g_configUrl)
+	local veraConfigData = util.httpGetJSON(g_configUrl)
 	if (veraConfigData) then
 		g_temperatureFormat = veraConfigData.temperature;
 		if (not g_temperatureFormat) then
@@ -1155,17 +1106,58 @@ function initialize(lul_device)
 	initLuupVariables()
 
 	-- get ip address for thermostat
-	g_ipAddress = luup.devices[g_deviceId].ip
 
+	-- if ip address stored in device.ip then move to Luup variable
+	g_ipAddress = luup.devices[g_deviceId].ip
 	if (g_ipAddress and g_ipAddress ~= "") then
-		log.info("Using IP Address: " , g_ipAddress)
+		util.setLuupVariable(RTCOA_WIFI_SID, "IPAddress", g_ipAddress, g_deviceId)
+		luup.attr_set("ip", "", g_deviceId)
 	else
+		g_ipAddress = util.getLuupVariable(RTCOA_WIFI_SID, "IPAddress", g_deviceId, util.T_STRING)
+	end
+
+	-- Clear the MAC address, if any
+	luup.attr_set("mac", "", g_deviceId)
+
+	if (g_ipAddress == nil or g_ipAddress == "") then
 		local msg = "No IP Address configured for thermostat"
 		log.error(msg)
 		return false, msg, "Radio Thermostat Wifi"
 	end
 
-	luup.call_delay("initializePhase2", 1, g_deviceId, true)
+	log.info("Using IP Address: " , g_ipAddress)
+
+	-- create the generic device (if enabled)
+	createGenericDevice()
+
+	-- retrieve the thermostat metadata (firmware version, model, etc.)
+	retrieveThermostatMetadata()
+
+	-- retrieve current thermostat status
+	retrieveThermostatStatus()
+
+	local pmaTempDevice = util.getLuupVariable(RTCOA_WIFI_SID, "PMATempDevice", g_deviceId, util.T_NUMBER)
+	if (pmaTempDevice > 0) then
+		log.info ("Registering PMA temperature callback, device = ", pmaTempDevice)
+		luup.variable_watch("pmaTempCallback", TEMP_SENSOR_SID, "CurrentTemperature", pmaTempDevice)
+	end
+
+	local remoteTempDevice = util.getLuupVariable(RTCOA_WIFI_SID, "RemoteTempDevice", g_deviceId, util.T_NUMBER)
+	if (remoteTempDevice > 0) then
+		log.info ("Registering remote temperature callback, device = ", remoteTempDevice)
+		luup.variable_watch("remoteTempCallback", TEMP_SENSOR_SID, "CurrentTemperature", remoteTempDevice)
+	end
+
+	local initialPollDelay = util.getLuupVariable(RTCOA_WIFI_SID, "InitialPollDelay", g_deviceId, util.T_NUMBER)
+	local pollInterval = util.getLuupVariable(RTCOA_WIFI_SID, "PollInterval", g_deviceId, util.T_NUMBER)
+
+	-- start the polling loop after the user specified delay
+	luup.call_delay("thermostatPoller", initialPollDelay + pollInterval, "true", true)
+
+	if (util.getLuupVariable(RTCOA_WIFI_SID, "SyncClock", g_deviceId, util.T_BOOLEAN)) then
+		-- start the clock sync loop as well
+		luup.call_delay("syncClock", initialPollDelay * 60 + pollInterval, g_deviceId, true)
+	end
 
 	log.info("Done with initialization")
 end
