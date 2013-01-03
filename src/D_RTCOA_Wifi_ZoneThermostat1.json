@@ -1,5 +1,5 @@
  {
-    "flashicon": "http://www.hugheaves.com/vera/resources/thermostat/2.3/thermostat_icon.png",
+    "flashicon": "http://www.hugheaves.com/vera/resources/thermostat/2.4/thermostat_icon.png",
     "iconText": "1",
     "imgIconBody": "",
     "imgIconDimmable": "",
@@ -8,7 +8,7 @@
     "imgIconMax": "",
     "halloIconsDir": "pics/hallo",
     "x": "5",
-    "y": "4",
+    "y": "5.2",
     "inScene": "1",
     "DisplayStatus": {
         "Style": "numeric",
@@ -87,14 +87,14 @@
                     "top": "0",
                     "left": "0",
                     "x": "1",
-                    "y": "4"
+                    "y": "5"
                 },
                 {
                     "id": "4",
                     "top": "0",
                     "left": "1",
                     "x": "1",
-                    "y": "4"
+                    "y": "5"
                 },
                 {
                     "id": "7",
@@ -115,24 +115,26 @@
                     "top": "0",
                     "left": "2",
                     "x": "1",
-                    "y": "4"
+                    "y": "5"
                 },
                 {
                     "id": "8",
                     "top": "0",
                     "left": "3",
                     "x": "1",
-                    "y": "4"
+                    "y": "5"
                 }
             ],
             "Control": [
                 {
+                    "ControlGroup": "1",
                     "ControlType": "label",
                     "top": "0",
                     "left": "0",
+                    "text_align": "left",
                     "Label": {
-                        "lang_tag": "thermostat",
-                        "text": "Thermostat"
+                        "lang_tag": "mode",
+                        "text": "Mode"
                     },
                     "Display": {
                         "Top": 0,
@@ -144,7 +146,7 @@
                 {
                     "ControlGroup": "1",
                     "ControlType": "button",
-                    "top": "0",
+                    "top": "1",
                     "left": "0",
                     "Label": {
                         "lang_tag": "cmd_off",
@@ -174,7 +176,7 @@
                 {
                     "ControlGroup": "1",
                     "ControlType": "button",
-                    "top": "1",
+                    "top": "2",
                     "left": "0",
                     "Label": {
                         "lang_tag": "cmd_auto",
@@ -204,7 +206,7 @@
                 {
                     "ControlGroup": "1",
                     "ControlType": "button",
-                    "top": "2",
+                    "top": "3",
                     "left": "0",
                     "Label": {
                         "lang_tag": "cmd_cool",
@@ -234,7 +236,7 @@
                 {
                     "ControlGroup": "1",
                     "ControlType": "button",
-                    "top": "3",
+                    "top": "4",
                     "left": "0",
                     "Label": {
                         "lang_tag": "cmd_heat",
@@ -320,7 +322,7 @@
                 {
                     "ControlGroup": "4",
                     "ControlType": "label",
-                    "top": "0.1",
+                    "top": "0",
                     "left": "0",
                     "text_align": "left",
                     "Label": {
@@ -427,12 +429,12 @@
                 {
                     "ControlGroup": "5",
                     "ControlType": "label",
-                    "top": "0.1",
+                    "top": "0",
                     "left": "0",
                     "text_align": "left",
                     "Label": {
-                        "lang_tag": "energy_mode",
-                        "text": "Energy Save"
+                        "lang_tag": "energy_led",
+                        "text": "Energy LED"
                     },
                     "Display": {
                         "Top": 120,
@@ -447,29 +449,29 @@
                     "top": "1",
                     "left": "0",
                     "Label": {
-                        "lang_tag": "cmd_energy",
-                        "text": "Energy"
+                        "lang_tag": "cmd_led_red",
+                        "text": "Red"
                     },
                     "Display": {
                         "Top": 150,
                         "Left": 50,
                         "Width": 100,
                         "Height": 20,
-                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
-                        "Variable": "EnergyModeStatus",
-                        "Value": "EnergySavingsMode"
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
+                        "Variable": "EnergyLEDColor",
+                        "Value": "Red"
                     },
                     "Command": {
-                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
-                        "Action": "SetEnergyModeTarget",
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
+                        "Action": "SetEnergyLED",
                         "Parameters": [
                             {
-                                "Name": "NewModeTarget",
-                                "Value": "EnergySavingsMode"
+                                "Name": "NewColor",
+                                "Value": "Red"
                             }
                         ]
                     },
-                    "ControlCode": "energy_energy"
+                    "ControlCode": "led_color"
                 },
                 {
                     "ControlGroup": "5",
@@ -478,24 +480,24 @@
                     "left": "0",
                     "Label": {
                         "lang_tag": "cmd_normal",
-                        "text": "Normal"
+                        "text": "Green"
                     },
                     "Display": {
                         "Top": 150,
                         "Left": 160,
                         "Width": 100,
                         "Height": 20,
-                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
-                        "Variable": "EnergyModeStatus",
-                        "Value": "Normal"
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
+                        "Variable": "EnergyLEDColor",
+                        "Value": "Green"
                     },
                     "Command": {
-                        "Service": "urn:upnp-org:serviceId:HVAC_UserOperatingMode1",
-                        "Action": "SetEnergyModeTarget",
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
+                        "Action": "SetEnergyLED",
                         "Parameters": [
                             {
-                                "Name": "NewModeTarget",
-                                "Value": "Normal"
+                                "Name": "NewColor",
+                                "Value": "Green"
                             }
                         ]
                     }
@@ -503,7 +505,82 @@
                 {
                     "ControlGroup": "8",
                     "ControlType": "label",
-                    "top": "0.1",
+                    "top": "0",
+                    "left": "0",
+                    "text_align": "left",
+                    "Label": {
+                        "lang_tag": "hold_mode",
+                        "text": "Hold"
+                    },
+                    "Display": {
+                        "Top": 180,
+                        "Left": 30,
+                        "Width": 100,
+                        "Height": 20
+                    }
+                },
+                {
+                    "ControlGroup": "5",
+                    "ControlType": "button",
+                    "top": "3",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_normal",
+                        "text": "Yellow"
+                    },
+                    "Display": {
+                        "Top": 150,
+                        "Left": 160,
+                        "Width": 100,
+                        "Height": 20,
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
+                        "Variable": "EnergyLEDColor",
+                        "Value": "Yellow"
+                    },
+                    "Command": {
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
+                        "Action": "SetEnergyLED",
+                        "Parameters": [
+                            {
+                                "Name": "NewColor",
+                                "Value": "Yellow"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "5",
+                    "ControlType": "button",
+                    "top": "4",
+                    "left": "0",
+                    "Label": {
+                        "lang_tag": "cmd_normal",
+                        "text": "Off"
+                    },
+                    "Display": {
+                        "Top": 150,
+                        "Left": 160,
+                        "Width": 100,
+                        "Height": 20,
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
+                        "Variable": "EnergyLEDColor",
+                        "Value": "Off"
+                    },
+                    "Command": {
+                        "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
+                        "Action": "SetEnergyLED",
+                        "Parameters": [
+                            {
+                                "Name": "NewColor",
+                                "Value": "Off"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "ControlGroup": "8",
+                    "ControlType": "label",
+                    "top": "0",
                     "left": "0",
                     "text_align": "left",
                     "Label": {

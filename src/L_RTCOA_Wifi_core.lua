@@ -31,7 +31,7 @@ local http = require("socket.http")
 -- CONSTANTS
 
 -- Plug-in version
-local PLUGIN_VERSION = "2.3"
+local PLUGIN_VERSION = "2.4"
 
 local DEFAULT_POLL_INTERVAL = 60
 
@@ -104,7 +104,7 @@ local g_deviceId = nil
 local g_genericDeviceId = nil
 
 local g_ipAddress = nil
-local g_programs = nil
+local g_ = nil
 local g_thermostatTime = nil
 local g_configUrl = DEFAULT_VERA_CONFIG_URL
 
@@ -186,7 +186,7 @@ local TSTAT_API_FSTATE = {
 
 -- set a luup variable in both thermostat devices
 local function setLuupVariable(sid, variableName, value, deviceId)
-	luup.variable_set(sid, variableName, value, deviceId)
+	util.setLuupVariable(sid, variableName, value, deviceId)
 	if (g_genericDeviceId and deviceId == g_deviceId and GENERIC_DEVICE_SIDS[sid]) then
 		util.setLuupVariable(sid, variableName, value, g_genericDeviceId)
 	elseif (deviceId == g_genericDeviceId) then
@@ -581,7 +581,7 @@ end
 
 --- Set the energy LED variable to a new value and send the new value to the thermostat
 local function setEnergyLED (lul_settings)
-	setLuupVariable(RTCOA_WIFI_SID, "EnergyLEDColor", lul_settings.NewState, g_deviceId)
+	setLuupVariable(RTCOA_WIFI_SID, "EnergyLEDColor", lul_settings.NewColor, g_deviceId)
 	setLuupVariable(RTCOA_WIFI_SID, "EnergyLEDSet", 1, g_deviceId)
 
 	return updateEnergyLED()
@@ -1079,7 +1079,7 @@ function initialize(lul_device)
 
 	luup.attr_set("category_num", "5", lul_device)
 
-	util.initLogging(LOG_PREFIX, LOG_FILTER, RTCOA_WIFI_SID, g_deviceId)
+	util.initLogging(LOG_PREFIX, DEFAULT_LOG_CONFIG, RTCOA_WIFI_SID, g_deviceId)
 
 	log.info ("Initializing thermostat module for device " , g_deviceId)
 
