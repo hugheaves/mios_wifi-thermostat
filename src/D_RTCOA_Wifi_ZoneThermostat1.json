@@ -1,5 +1,5 @@
  {
-    "flashicon": "http://www.hugheaves.com/vera/resources/thermostat/2.4/thermostat_icon.png",
+    "flashicon": "http://www.hugheaves.com/vera/resources/thermostat/2.5/thermostat_icon.png",
     "iconText": "1",
     "imgIconBody": "",
     "imgIconDimmable": "",
@@ -1071,6 +1071,6 @@
             ]
         }
     ],
-    "DeviceType": "urn:schemas-hugheaves-com:device:RTCOA_Wifi_ZoneThermostat:1",
-    "device_type": "urn:schemas-hugheaves-com:device:RTCOA_Wifi_ZoneThermostat:1"
+    "DeviceType": "urn:schemas-hugheaves-com:device:HVAC_ZoneThermostat:1",
+    "device_type": "urn:schemas-hugheaves-com:device:HVAC_ZoneThermostat:1"
 }
