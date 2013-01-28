@@ -31,7 +31,7 @@ local http = require("socket.http")
 -- CONSTANTS
 
 -- Plug-in version
-local PLUGIN_VERSION = "2.5"
+local PLUGIN_VERSION = "2.6"
 
 local DEFAULT_POLL_INTERVAL = 60
 
@@ -272,6 +272,20 @@ local function isValidAPIParameterValue(value)
 	return true
 end
 
+--- Check if we got a value that looks "normal" for the thermostat API - 
+-- this version of the check allows for a null value, but if the
+-- value is present, it must be numeric
+-- @return true if the parameter value is in the valid range for the thermostat API
+local function isValidOptionalAPIParameterValue(value)
+	if (value == nil or value == "") then
+		return true
+	end
+	if (type(value) == "numeric" and value < 0) then
+		return false
+	end
+	return true
+end
+
 --- Check for valid response to a status inquiry
 local function isValidStatusResponse(response)
 	log.debug ("validating status response")
@@ -300,7 +314,7 @@ local function isValidStatusResponse(response)
 			error = true
 		end
 
-		if (not isValidAPIParameterValue(response.tstate)) then
+		if (not isValidOptionalAPIParameterValue(response.tstate)) then
 			log.error ("Invalid tstate")
 			error = true
 		end
@@ -310,7 +324,7 @@ local function isValidStatusResponse(response)
 			error = true
 		end
 
-		if (not isValidAPIParameterValue(response.fstate)) then
+		if (not isValidOptionalAPIParameterValue(response.fstate)) then
 			log.error ("Invalid fstate")
 			error = true
 		end
@@ -434,9 +448,28 @@ local function retrieveThermostatStatus()
 
 	-- Set MCV's "ModeState" variable to represent the current operating state. I think
 	-- this should really have been set in "ModeStatus", but what can you do? :)
-	setLuupVariable(MCV_OPERATING_STATE_SID, "ModeState", TSTAT_API_TSTATE[response.tstate], g_deviceId)
+	
+	-- if we have a tstate from the thermostat, use it - otherwise, use tmode
+	if (response.tstate ~= null and response.tstate ~= "") then
+		setLuupVariable(MCV_OPERATING_STATE_SID, "ModeState", TSTAT_API_TSTATE[response.tstate], g_deviceId)
+	else
+		local newTstate;
+		if (response.tmode < 3) then -- only set tstate = tmode if tmode != Auto
+			newTstate = TSTAT_API_TSTATE[response.tmode]
+		else
+			newTstate = TSTAT_API_TSTATE[0]
+		end
+		setLuupVariable(MCV_OPERATING_STATE_SID, "ModeState", newTstate, g_deviceId)	
+	end
+	
 	setLuupVariable(FAN_MODE_SID, "Mode", TSTAT_API_FMODE[response.fmode], g_deviceId)
-	setLuupVariable(FAN_MODE_SID, "FanStatus", TSTAT_API_FSTATE[response.fstate], g_deviceId)
+	
+	-- if we have an fstate from the thermostat, use it - otherwise, set the fan to "not running"
+	if (response.fstate ~= null and response.fstate ~= "") then
+		setLuupVariable(FAN_MODE_SID, "FanStatus", TSTAT_API_FSTATE[response.fstate], g_deviceId)
+	else
+		setLuupVariable(FAN_MODE_SID, "FanStatus", TSTAT_API_FSTATE[0], g_deviceId)	
+	end
 
 	-- only update hold mode and temperature from the thermostat if we're not in the "Off" state
 	if (TSTAT_API_TMODE[response.tmode] ~= "Off") then
