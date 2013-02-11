@@ -31,7 +31,7 @@ local http = require("socket.http")
 -- CONSTANTS
 
 -- Plug-in version
-local PLUGIN_VERSION = "2.7"
+local PLUGIN_VERSION = "3.0"
 
 local DEFAULT_POLL_INTERVAL = 60
 

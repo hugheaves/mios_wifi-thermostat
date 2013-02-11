@@ -1,5 +1,5 @@
  {
-    "flashicon": "http://www.hugheaves.com/vera/resources/thermostat/2.7/thermostat_icon.png",
+    "flashicon": "http://www.hugheaves.com/vera/resources/thermostat/3.0/thermostat_icon.png",
     "iconText": "1",
     "imgIconBody": "",
     "imgIconDimmable": "",
@@ -455,7 +455,7 @@
                     "Display": {
                         "Top": 150,
                         "Left": 50,
-                        "Width": 100,
+                        "Width": 70,
                         "Height": 20,
                         "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
                         "Variable": "EnergyLEDColor",
@@ -479,13 +479,13 @@
                     "top": "2",
                     "left": "0",
                     "Label": {
-                        "lang_tag": "cmd_normal",
+                        "lang_tag": "cmd_led_green",
                         "text": "Green"
                     },
                     "Display": {
                         "Top": 150,
-                        "Left": 160,
-                        "Width": 100,
+                        "Left": 140,
+                        "Width": 70,
                         "Height": 20,
                         "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
                         "Variable": "EnergyLEDColor",
@@ -503,35 +503,18 @@
                     }
                 },
                 {
-                    "ControlGroup": "8",
-                    "ControlType": "label",
-                    "top": "0",
-                    "left": "0",
-                    "text_align": "left",
-                    "Label": {
-                        "lang_tag": "hold_mode",
-                        "text": "Hold"
-                    },
-                    "Display": {
-                        "Top": 180,
-                        "Left": 30,
-                        "Width": 100,
-                        "Height": 20
-                    }
-                },
-                {
                     "ControlGroup": "5",
                     "ControlType": "button",
                     "top": "3",
                     "left": "0",
                     "Label": {
-                        "lang_tag": "cmd_normal",
+                        "lang_tag": "cmd_led_yellow",
                         "text": "Yellow"
                     },
                     "Display": {
                         "Top": 150,
-                        "Left": 160,
-                        "Width": 100,
+                        "Left": 230,
+                        "Width": 70,
                         "Height": 20,
                         "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
                         "Variable": "EnergyLEDColor",
@@ -554,13 +537,13 @@
                     "top": "4",
                     "left": "0",
                     "Label": {
-                        "lang_tag": "cmd_normal",
+                        "lang_tag": "cmd_led_off",
                         "text": "Off"
                     },
                     "Display": {
                         "Top": 150,
-                        "Left": 160,
-                        "Width": 100,
+                        "Left": 320,
+                        "Width": 70,
                         "Height": 20,
                         "Service": "urn:hugheaves-com:serviceId:HVAC_RTCOA_Wifi1",
                         "Variable": "EnergyLEDColor",
