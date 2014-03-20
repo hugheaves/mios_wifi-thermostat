@@ -1,8 +1,7 @@
 mios_wifi-thermostat
 ====================
 
-![Picture of 3M-50 Thermostat][thermostat-pic]
-[thermostat-pic]: https://raw.githubusercontent.com/hugheaves/mios_wifi-thermostat/master/resources/Thermostat.jpg "Picture of 3M-50 Thermostat"
+![Picture of 3M-50 Thermostat](https://raw.githubusercontent.com/hugheaves/mios_wifi-thermostat/master/resources/Thermostat.jpg)
 
 
 
