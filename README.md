@@ -1,15 +1,16 @@
 mios_wifi-thermostat
 ====================
 
-![Picture of 3M-50 Thermostat](https://raw.githubusercontent.com/hugheaves/mios_wifi-thermostat/master/resources/Thermostat.jpg)
+![Picture of 3M-50 Thermostat](https://github.com/hugheaves/mios_wifi-thermostat/raw/master/resources/thermostat.jpg)
+![Screenshot of Vera Thermostat Control for 3M-50](https://github.com/hugheaves/mios_wifi-thermostat/raw/master/resources/VeraControl.png)
 
 
 
-# Introduction
+## Introduction
 
 The [Radio Thermostat Wi-Fi Plugin](https://apps.mios.com/plugin.php?id=1618) integrates Radio Thermostat products using the USNAP Wi-Fi module with Vera. (i.e. the [Filtrete 3M-50](http://www.radiothermostat.com/filtrete/products/3M-50) available at [Home Depot](http://www.homedepot.com/buy/electrical-home-automation-security-home-automation-climate-control/filtrete-7-day-touchscreen-wifi-enabled-programmable-thermostat-with-backlight-182800.html))  The plugin is designed to co-exist with existing thermostat controls, including Radio Thermostat's cloud, and manual control from the physical thermostat interface.
 
-# Requirements
+## Requirements
 
 * A Vera device with UI5
 * A compatible Radio Thermostat Wi-Fi thermostat. This plug-in was developed and tested with the [3M-50](http://www.radiothermostat.com/filtrete/products/3M-50), but should work with other Radio Thermostat  thermostats with the Wi-Fi USNAP module.
@@ -17,7 +18,7 @@ The [Radio Thermostat Wi-Fi Plugin](https://apps.mios.com/plugin.php?id=1618) in
 * You need to know the IP address of your thermostat. I suggest either assigning a static IP to the thermostat, or creating a static / permanent DHCP allocation for the thermostat in your router.
 * The thermostat firmware must be version 1.04.64 or newer. *Note: to be able to use the full feature set of the plugin, firmware version 1.04.82 or newer is required.* To check your current thermostat version, browse to http://IPAddressOfYourThermostat/ and look for "Firmware Version" at the bottom of the page.
 
-# What's New / Version History
+## What's New / Version History
 
 This is a list of the changes, bug fixes, and new features in each released version of the plugin.
 
@@ -63,18 +64,19 @@ This is a list of the changes, bug fixes, and new features in each released vers
 ### 0.1 - Released 2/15/2012
 * Initial release
 
-# Installation
+## Installation
 
 This is (currently) a UI5 only plugin, so the easiest way to install the plug-in is via the [Vera Web Portal](http://docs5.mios.com/doc.php?page=mymios_web_portal):
 1. In your Vera Web Portal, navigate to "Apps" -> "Install Apps", and then search for "Thermostat" to find the "Radio Thermostat Wifi plugin"
 2. Click on "Install" to install the plugin.
 3. Vera will display the message "Please wait while the plugin is downloaded". 
 
-[[Image(Please Wait.jpg)]]
+![Screenshot showing please wait dialog](https://github.com/hugheaves/mios_wifi-thermostat/raw/master/resources/Please%20Wait.png)
+
 4. Once the plugin has been downloaded and installed, Vera will show the device configuration dialog
 5. Click on the "Advanced" tab of the device configuration dialog, enter the IP Address of your thermostat in the "ip" field.
 
-[[Image(Advanced Tab.jpg)]]
+![Screenshot showing advanced configurtation tab](https://github.com/hugheaves/mios_wifi-thermostat/raw/master/resources/Advanced%20Tab.jpg)
 
 6. Close the configuration dialog, and click "Save" to save your configuration.
 7. In a minute or two, your thermostat device will appear in your device list.
@@ -85,7 +87,7 @@ Thermostat control changes (mode, temp settings, etc.) made in the Vera UI are a
 
 Vera does not attempt to take exclusive control of the thermostat. Unless the thermostat is placed in "Hold" or "Simple Screen" mode, the schedule programmed into the thermostat will still be in effect. If you're feeling adventurous and want to completely control the thermostat from Vera, I would suggest placing the thermostat in Simple Screen mode. (this is effectively hold mode, but without displaying "Hold" on the thermostat display) See the "How to change from standard screen to simple screen" link on [this page](http://www.radiothermostat.com/filtrete/help/) for information on how to change to simple screen mode.
 
-# Advanced Configuration
+## Advanced Configuration
 
 The following settings on the "Advanced" tab of the device configuration dialog can be used to alter the default behavior of the thermostat plug-in.
 
@@ -133,7 +135,7 @@ Note: if you're using Radio Thermostat's cloud services, I wouldn't suggest enab
 
 Note that the temperature sensor doesn't necessarily have to be a physical device. For example, the [Weather Plugin](http://code.mios.com/trac/mios_weather) provides a virtual temperature sensor that display the current outside temperature as read from Google's weather service. This temperature can be displayed on your thermostat to give an "at a glance" outside temperature reading even if you don't have a real outside temperature sensor. (Cool, huh? :)
 
-[[Image(DeviceNum.png)]]
+![Screenshot showing how to identify device number](https://github.com/hugheaves/mios_wifi-thermostat/raw/master/resources/DeviceNum.png)
 
 ### RemoteTempDevice
 *Required Plugin Version:* 0.8+
@@ -150,15 +152,15 @@ Note that the temperature sensor doesn't necessarily have to be a physical devic
 *Default Value:* 0
 *Description:* When this variable is set to "1", the thermostat plugin will create an extra "genric" thermostat device of type "urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1". Both the main thermostat device and this generic device will control the same physical thermostat. This feature allows the Wifi thermostat to be recognized by applications that only recognize the generic "urn:schemas-upnp-org:device:HVAC_ZoneThermostat:1" devices as thermostats. If your Wifi thermostats are controllable in the apps that you use, then there is no need to enable this feature.
 
-# Known Issues / Limitations
+## Known Issues / Limitations
 
 * In releases 0.7 and older, changing the temperature set point for heating will place the thermostat in heating mode, regardless of it's current mode. (i.e. the thermostat will switch from cooling to heating mode). The reverse is also true: setting the cooling set point will place the thermostat in cooling mode. This is not a limitation in version 0.8 and newer.
 
-# Planned Enhancements
+## Planned Enhancements
 
 The current focus is on stabilization and bug fixes. There are no planned enhancements at this time.
 
-# Enhancements "Ideas"
+## Enhancements "Ideas"
 
 This is a list of things that may be possible to implement in the future. If you're interested in any of these (or others), let me know:
 * "Enhanced Status Display" - display current status information (fan running, actively cooling, etc.), not just settings, in the Vera UI. Also, poll thermostat relay states for more detailed status information for multi-stage systems. For example, instead of just "heating", provide a status that differentiates between which stage is active (heat-pump vs aux/electric). This would be useful for detailed energy tracking.
