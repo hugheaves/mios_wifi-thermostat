@@ -7,15 +7,15 @@ mios_wifi-thermostat
 Table of Contents
 =================
 
-[Introduction](#introduction)  
-[Requirements](#requirements)  
-[What's New / Version History](#whats-new--version-history)  
-[Installation](#installation)  
-[Operation](#operation)  
-[Advanced Configuration](#advanced-configuration)  
-[Known Issues / Limitations](#known-issues--limitations)  
-[Planned Enhancements](#planned-enhancements)  
-[Enhancement "Ideas"](#enhancement-ideas)  
+* [Introduction](#introduction)  
+* [Requirements](#requirements)  
+* [What's New / Version History](#whats-new--version-history)  
+* [Installation](#installation)  
+* [Operation](#operation)  
+* [Advanced Configuration](#advanced-configuration)  
+* [Known Issues / Limitations](#known-issues--limitations)  
+* [Planned Enhancements](#planned-enhancements)  
+* [Enhancement "Ideas"](#enhancement-ideas)  
 
 ## Introduction
 
