@@ -1,6 +1,11 @@
 mios_wifi-thermostat
 ====================
 
+![Picture of 3M-50 Thermostat][thermostat-pic]
+[thermostat-pic]: https://raw.githubusercontent.com/hugheaves/mios_wifi-thermostat/master/resources/Thermostat.jpg "Picture of 3M-50 Thermostat"
+
+
+
 # Introduction
 
 The [Radio Thermostat Wi-Fi Plugin](https://apps.mios.com/plugin.php?id=1618) integrates Radio Thermostat products using the USNAP Wi-Fi module with Vera. (i.e. the [Filtrete 3M-50](http://www.radiothermostat.com/filtrete/products/3M-50) available at [Home Depot](http://www.homedepot.com/buy/electrical-home-automation-security-home-automation-climate-control/filtrete-7-day-touchscreen-wifi-enabled-programmable-thermostat-with-backlight-182800.html))  The plugin is designed to co-exist with existing thermostat controls, including Radio Thermostat's cloud, and manual control from the physical thermostat interface.
