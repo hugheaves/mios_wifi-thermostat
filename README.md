@@ -181,7 +181,7 @@ Note that the temperature sensor doesn't necessarily have to be a physical devic
 
 The current focus is on stabilization and bug fixes. There are no planned enhancements at this time.
 
-## Enhancements "Ideas"
+## Enhancement "Ideas"
 
 This is a list of things that may be possible to implement in the future. If you're interested in any of these (or others), let me know:
 * "Enhanced Status Display" - display current status information (fan running, actively cooling, etc.), not just settings, in the Vera UI. Also, poll thermostat relay states for more detailed status information for multi-stage systems. For example, instead of just "heating", provide a status that differentiates between which stage is active (heat-pump vs aux/electric). This would be useful for detailed energy tracking.
