@@ -239,8 +239,9 @@ local function callThermostatAPI(path, responseValidationFunction, requestParame
 
 	repeat
 		-- if this is a retry, then we wait a little
-		luup.sleep(retries * 1000)
 		if (retries > 0) then
+			log.info("sleeping for ", retries * 1000, "ms before retrying request")
+			luup.sleep(retries * 1000)
 			log.info("retrying request, url = ", url, ", retry #", retries)
 		end
 
