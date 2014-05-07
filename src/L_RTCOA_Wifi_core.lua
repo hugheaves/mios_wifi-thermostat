@@ -21,9 +21,9 @@ local luup = luup
 local string = string
 local require = require
 local math = math
-local json = g_dkjson
-local log = g_log
-local util = g_util
+local log = require("L_" .. g_pluginName .. "_" .. "log")
+local util = require("L_" .. g_pluginName .. "_" .. "util")
+local json = require("L_" .. g_pluginName .. "_" .. "dkjson")
 
 -- IMPORT REQUIRED MODULES
 local http = require("socket.http")
@@ -31,7 +31,7 @@ local http = require("socket.http")
 -- CONSTANTS
 
 -- Plug-in version
-local PLUGIN_VERSION = "3.0"
+local PLUGIN_VERSION = "3.1"
 
 local DEFAULT_POLL_INTERVAL = 60
 

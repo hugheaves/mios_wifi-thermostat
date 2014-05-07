@@ -33,6 +33,9 @@ The [Radio Thermostat Wi-Fi Plugin](https://apps.mios.com/plugin.php?id=1618) in
 
 This is a list of the changes, bug fixes, and new features in each released version of the plugin.
 
+### 3.1 - Released 5/8/2014
+* Updated zz_common libraries to latest version.
+
 ### 3.0 - Released 2/14/2013
 * Fixed bug with energy LED controls.
 

@@ -22,14 +22,14 @@
 		<protocol>raw</protocol>
 	</settings>
 	<functions>
-		g_dkjson = require("L_RTCOA_Wifi_dkjson")
-		g_log = require("L_RTCOA_Wifi_log")
-		g_util = require("L_RTCOA_Wifi_util")
-		g_core = require("L_RTCOA_Wifi_core")
+        g_pluginName = "RTCOA_Wifi"
 
-		function initialize(lul_device)
-			g_core.initialize(lul_device)
-		end
+        g_core = require("L_" .. g_pluginName .. "_" .. "core")
+
+        function
+        initialize(lul_device)
+        g_core.initialize(lul_device)
+        end
 	</functions>
 	<startup>initialize</startup>
 	<actionList>
